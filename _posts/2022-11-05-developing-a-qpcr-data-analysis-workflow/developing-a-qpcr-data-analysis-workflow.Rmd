@@ -1,0 +1,544 @@
+---
+title: "Developing a qPCR data analysis workflow"
+description: |
+  In-progress qPCR data analysis workflow in R, using data from the 2022-Q2 Sprint spike-in experiment.
+author:
+  - name: Mike
+date: 2022-11-05
+categories:
+  - qPCR
+  - R
+bibliography: ../../_references.bib
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300
+)
+```
+
+# Setup
+
+```{r}
+library(tidyverse)
+library(here)
+library(fs)
+# library(generics)
+
+library(cowplot)
+theme_set(theme_cowplot())
+library(patchwork)
+```
+
+The data is from [a folder in the NAO Drive](https://drive.google.com/drive/folders/1A1dVlJ-i2ji33FOhdfYqUs2yRcB7NldC) currently called 'Spike-in experiments', which I've downloaded locally.
+
+```{r}
+data_path <- here( '_data/nao/qpcr', '2022-06-29-spike-in-experiment/results')
+dir_ls(data_path) %>% path_file
+```
+
+TODO: try loading the data directly from Google Drive
+
+# Load qPCR data
+
+This file assumes that the data is within a folder 'data/' within the root project folder.
+
+File info:
+- Excel files have the raw and processed florescence measurements (Rn and Delta Rn), as well as the softwares autothreshold stuff in another sheet.
+- Also some sample metadata is here; however, we might want want to take that from the .txt file, since that is (I believe) closer to the original supplied table.
+<!--  -->
+
+TODO: Talk to Ari about whether we have/can save the files used to set up the qPCR experiment
+
+First, we can read in the relevant sections of the Excel file and clean up thedata a bit, 
+
+First, load in the sample metadata.
+
+- NOTE: Throughout, I'm using janitor::clean_names() to standardize the format of the column names
+<!--  -->
+
+```{r}
+sam <- path(data_path, '2022-06-29-trip01.txt') %>%
+  read_tsv(skip = 43) %>%
+  janitor::clean_names() %>%
+  mutate(
+    row = str_sub(well_position, 1, 1) %>% as.ordered,
+    column = str_sub(well_position, 2) %>% as.integer %>% as.ordered,
+  ) %>%
+  # relocate(row, column, .after = well_position) %>%
+  glimpse
+```
+
+- TODO: pre-specify the column types
+- NOTE: In this experiment, the target name was incorrectly set to be identical to the sample name; instead, each non-blank sample should have the target corresponding to the primer/probe pair (here, 009 or 010). The import chunk therefore replaces the target name accordingly. The blank is ste to NA since no primers/master mix is added. 
+  - TODO: confirm this with Anjali and Ari; and in future, make sure target corresponds to the relevant primer/probe set for that well.
+  - TODO: Suggest that we use more descriptive target names than '010'
+- TODO: Suggest we find some way of directly adding the dilution and perhaps the concentration to the sample data, rather than having to parse from the sample name
+<!--  -->
+
+There is additional sample data hidden in the sample names, which we'll need to fix in future runs (it should be in its own columns in a table).
+But for now we can parse it from the sample names.
+I'll overwrite the faulty target names.
+
+```{r}
+sam <- sam %>%
+  separate(sample_name, 
+    into = c('ww_triplicate', 'target_name', 'dilution_name'),
+    sep = '_', extra = 'merge',
+    remove = FALSE
+  )
+```
+
+NOTE: The target name of the NTC is now NA, which is incorrect, but I'm not going to worry about that now.
+The proper fix is for the target name to be fixed in the source data.
+
+NOTE: We need to use the actual starting concentrations for the standard curve. Need to talk to Anjali about how these should be supplied.
+Here I will assume the following.
+
+```{r}
+# concentration in copies per microliter
+conc_low <- 0.1
+dilution_step <- 20
+num_samples <- 7
+conc_max <- conc_low * dilution_step^(num_samples - 1)
+
+dilution_df <- tibble(
+  dilution_power = 0:6,
+  dilution_factor = dilution_step^dilution_power,
+  conc = conc_max / dilution_factor,
+  dilution_name = str_c('D', '0', dilution_power + 1)
+)
+```
+
+which we must add to the sample data,
+
+```{r}
+sam <- sam %>%
+  left_join(dilution_df, by = 'dilution_name')
+```
+
+
+Next, load the amplification data --- the relative florescence values (Rn and Delta Rn) --- and join the sample metadata.
+
+```{r}
+amp <- path(data_path, '2022-06-29-trip01.xlsx') %>%
+  readxl::read_excel(
+    sheet = 'Amplification Data',
+    skip = 40,
+    col_types = c('numeric', 'text', 'numeric', 'text', 'numeric', 'numeric')
+  ) %>%
+  janitor::clean_names() %>%
+  glimpse
+```
+
+Note, this table has the original, incorrect target name.
+I'll drop that, and join the sample metadata table which has the corrected target names.
+
+```{r}
+amp <- amp %>%
+  select(-target_name) %>%
+  left_join(sam, by = c('well', 'well_position')) %>%
+  glimpse
+```
+
+- TODO: Read in the baseline start/stop points, so can view and check where in the amplifying/not portion
+<!--  -->
+
+
+# Explore sample metadata
+
+
+```{r}
+sam %>%
+  count(target_name)
+```
+
+## Plot the plate layout
+
+TODO: use code from vivo vitro to do this nicely; need to first parse the row and column from the well position
+
+```{r, include = FALSE, eval = FALSE}
+sam %>%
+  mutate(across(row, fct_rev)) %>%
+  ggplot(aes(y = row, x = column)) +
+  coord_fixed() +
+  geom_tile(aes(fill = target_name), color = 'lightgrey') +
+  geom_text(aes(label = sample_name), size = 3) +
+  labs(title = "Plate layout") +
+  scale_fill_brewer(type = 'qual') +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+TODO: see if can flow the sample names so that they print nicer
+
+# QC checks
+
+- Check the blanks
+- Check the NTCs and Neg controls (though this is target-specific)
+<!--  -->
+
+We'll want to do the analysis separately for each target.
+
+Maybe there's value in first looking at everything
+
+TODO: Set a fixed color scheme for the targets, and use this in all plots.
+
+```{r}
+delta_rn_min <- 1e-3
+p1 <- amp %>%
+  filter(!is.na(target_name)) %>%
+  ggplot(aes(cycle, pmax(delta_rn, delta_rn_min), color = target_name)) +
+  geom_line(aes(group = well)) +
+  scale_color_brewer(type = 'qual') +
+  geom_point() +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+p2 <- p1 +
+  scale_y_log10()
+p1 / p2
+```
+
+TODO: Consider if a better way to deal with non-positive values in the log-scale plot. See what the software does. (I think it might just not show these points.)
+
+
+# Analysis of a single target
+
+Will ultimately do this for all targets; perhaps show in tabs?
+For now, I'll use target 009.
+
+```{r}
+amp_cur <- amp %>%
+  filter(target_name == '009')
+```
+
+```{r}
+delta_rn_min <- 1e-3
+p1 <- amp_cur %>%
+  ggplot(aes(cycle, pmax(delta_rn, delta_rn_min), color = target_name)) +
+  geom_line(aes(group = well)) +
+  scale_color_brewer(type = 'qual') +
+  geom_point() +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+p2 <- p1 +
+  scale_y_log10()
+p1 / p2
+```
+
+## Pick threshold
+
+For now, will pick the threshold manually.
+
+```{r}
+threshold <- 3e-1
+p1 / p2 &
+  geom_hline(yintercept = threshold)
+```
+
+TODO: implement chosen auto-threshold algorithm.
+
+## Compute Cq values
+
+- TODO Ask Anjali if wants to use Ct or Cq as the name
+- TODO Separate out into distinct files the code where I'm testing for myself, and demonstrating for others
+<!--  -->
+
+I'll define a custom function `estimate_cq` to estimate the Cq value for a trajectotry crossing a given quantification threshold.
+See the appendix below for more info.
+
+```{r}
+estimate_cq <- function(.data, threshold) {
+  .data <- .data %>%
+    arrange(cycle) %>%
+    mutate(
+      # NOTE: log transformation, important for interpolation
+      across(delta_rn, log),
+      below = delta_rn < threshold,
+      above = delta_rn > threshold,
+    )
+  before <- .data %>%
+    filter(below) %>%
+    slice_tail(n = 1)
+  after <- .data %>%
+    filter(above) %>%
+    slice_head(n = 1)
+  # And find the intersection of the line passing between these two points, and the threshold.
+  slope <- (after$delta_rn - before$delta_rn) / (after$cycle - before$cycle)
+  delta_rn_diff <- threshold - before$delta_rn
+  cycle_diff <- delta_rn_diff / slope
+  ct <- before$cycle + cycle_diff
+  ct
+}
+```
+
+Now use this function to compute the Cq values for each trajectory
+
+
+```{r}
+sample_vars <-  sam %>% colnames
+cqs <- amp_cur %>%
+  with_groups(all_of(sample_vars), nest) %>%
+  mutate(
+    cq = map_dbl(data, estimate_cq, threshold = threshold)
+  ) %>%
+  select(-data) %>%
+  glimpse
+```
+
+## Estimate and plot standard curve
+
+Questions: 
+
+```{r}
+cqs <- cqs %>%
+  mutate(
+    conc_log10 = log10(conc) 
+  )
+```
+
+```{r}
+fit <- lm(cq ~ conc_log10, data = cqs)
+fit %>% summary
+```
+
+```{r}
+cqs %>%
+  ggplot(aes(conc_log10, cq)) +
+  geom_point() +
+  geom_abline(
+    intercept = coef(fit)[1],
+    slope = coef(fit)[2]
+  )
+```
+
+Note, better to plot in a way that shows the uncertainty.
+Can use stat smooth, but then not connected to the fit we did.
+Could be better to use some of the ggdist et al tools.
+
+```{r}
+cqs %>%
+  ggplot(aes(conc_log10, cq)) +
+  geom_point() +
+  stat_smooth(method = 'lm')
+```
+
+```{r}
+```
+
+## Estimate the efficiency from the standard curve
+
+We can estimate the efficiency from the slope of the standard curve using the standard formula,
+
+```{r}
+x <- fit %>% broom::tidy()
+slope <- coef(fit)['conc_log10']
+efficiency_estimate <- 10^(-1/slope) - 1
+```
+
+In this case, the estimate is unreasonably large because the standard curve isn't good.
+
+90% confidence interval:
+
+```{r}
+slope_ci <- confint(fit, parm = 'conc_log10', level = 0.9)
+efficiency_ci <- 10^(-1/slope_ci) - 1
+efficiency_ci
+```
+
+Quite a large range!
+
+
+## Bayesian version with rstanarm
+
+```{r}
+library(rstanarm)
+options(mc.cores = parallel::detectCores())
+
+library(ggdist)
+```
+
+```{r}
+stan_fit <- stan_glm(
+  cq ~ conc_log10, 
+  data = cqs,
+)
+stan_fit %>% summary
+```
+
+```{r}
+stan_fit %>% plot
+```
+
+try to get the posterior samples, so that we can then get the posterior of the efficiency estimate.
+
+TODO: google a better way to do this
+
+```{r}
+slope_post <- rstan::extract(stan_fit$stanfit)$beta
+efficiency_post <- 10^(-1/slope_post) - 1
+efficiency_post %>% qplot
+```
+
+note, we could use a stronger prior since we have a lot of relevant domain info.
+
+
+# Demo how to use the standard curve for calibration
+
+# Appendix
+
+## Function for finding ct in a well
+
+Standard method is to compute the Ct for each well independentally.
+Need to interpolate between points in the trajectory, and find when the trajectory crosses the threshold.
+I wonder what the software does; simplest method is perhaps linear interpolation of log Delta Rn.
+
+TODO: google linear interpolation in R. This is essentially what geom_line is doing. It would be handy if I could just get access to that output. Can also google how to create a piecewise linear function.
+
+### First try
+
+Since I don't have wifi, I will need to hack it myself.
+
+- For each well, find the cycles immediately before and after the theshold crossing
+- find the intersection between the line segment between those two points and the horizontal line at the threshold.
+<!--  -->
+
+```{r}
+```
+
+```{r}
+# Suppose we have the trajectory for a particular well
+x <- amp_cur %>%
+  filter(well == 52) %>%
+  select(cycle, delta_rn) %>%
+  arrange(cycle)
+# We can get the crossing point as follows
+x <- x %>%
+  mutate(
+    below = delta_rn < threshold,
+    above = delta_rn > threshold,
+  )
+before <- x %>%
+  filter(below) %>%
+  slice_tail(n = 1)
+after <- x %>%
+  filter(above) %>%
+  slice_head(n = 1)
+```
+
+And find the intersection.
+
+line passing between these two points, and the threshold.
+
+```{r}
+slope <- (after$delta_rn - before$delta_rn) / (after$cycle - before$cycle)
+delta_rn_diff <- threshold - before$delta_rn
+cycle_diff <- delta_rn_diff / slope
+ct <- before$cycle + cycle_diff
+```
+
+we can put this all together in a function,
+
+```{r}
+estimate_cq <- function(.data, threshold) {
+  .data <- .data %>%
+    arrange(cycle) %>%
+    mutate(
+      # NOTE: log transformation, important for interpolation
+      across(delta_rn, log),
+      below = delta_rn < threshold,
+      above = delta_rn > threshold,
+    )
+  before <- .data %>%
+    filter(below) %>%
+    slice_tail(n = 1)
+  after <- .data %>%
+    filter(above) %>%
+    slice_head(n = 1)
+  # And find the intersection of the line passing between these two points, and the threshold.
+  slope <- (after$delta_rn - before$delta_rn) / (after$cycle - before$cycle)
+  delta_rn_diff <- threshold - before$delta_rn
+  cycle_diff <- delta_rn_diff / slope
+  ct <- before$cycle + cycle_diff
+  ct
+}
+```
+
+ways we could improve 
+
+- check that there is only one crossing
+- check that the crossing is not in the noise region
+<!--  -->
+
+### Try 2, with wifi
+
+```{r}
+# Suppose we have the trajectory for a particular well
+x <- amp_cur %>%
+  filter(well == 52) %>%
+  select(cycle, delta_rn) %>%
+  arrange(cycle)
+# We can get the crossing point as follows
+x <- x %>%
+  mutate(
+    below = delta_rn < threshold,
+    above = delta_rn > threshold,
+  )
+before <- x %>%
+  filter(below) %>%
+  slice_tail(n = 1)
+after <- x %>%
+  filter(above) %>%
+  slice_head(n = 1)
+```
+
+We can use `approxfun()` to define the interpolating function.
+
+```{r}
+f <- approxfun(x$cycle, x$delta_rn %>% log, rule = 1)
+a <- seq(from = -5, to = 45, by = 0.1)
+qplot(a, f(a))
+```
+
+and then the intersection with e.g. a root-finding function, `uniroot()`. however, this approach is a bit funny because of the non-monotonicity in the noise region, and the fact that once we know the cycle interval we can calculate the intersection of the interpolation manually.
+
+
+## Efficiency estimate
+
+
+Derivation:
+
+The slope of the standard curve tells us how many extra cycles correspond to a 10X decrease in starting concentration.
+With perfect efficiency of $E=1$, this would equal $\log(10) / \log(2)$.
+More generally, the number of extra cycles is $A = \log(10) / \log(1 + E)$, for any log base; taking the log base to be 10 gives $A = 1 / \log(1 + E)$.
+The slope of the standard curve corresponds to $-A$.
+Therefore, we can estimate $E$ by
+
+\begin{align}
+  \hat E = 10^{1 / A} - 1
+\end{align}
+
+## Methods for setting the threshold
+
+https://www.researchgate.net/post/How-can-I-set-the-threshold-in-a-Real-Time-PCR-result has some discussion.
+One suggestion is to find candidate points based on the maximum of the second derivative of the amplification curves
+
+## Methods for finding the baseline region
+
+Not needed right now since we're using the software's determination of this.
+
+# Next steps
+
+- make an r package that can house helper functions
+- develop an autothreshold method
+- add the ability to check the baseline calculation
+- save output
+<!--  -->
