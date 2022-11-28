@@ -1,0 +1,80 @@
+---
+title: "EGD theory notes"
+description: |
+  Captured notes on exponential growth detection.
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - EGD
+bibliography: ../../_references.bib
+date: 2022-11-28
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = FALSE
+)
+```
+
+```{r}
+library(tidyverse)
+#> library(fs)
+#> library(here)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+```
+
+# Standard error of growth rate under IID multiplicative noise
+
+
+## 2022-03-28
+
+Under IID multiplicative noise, the exponential growth (EG) model is equivalent to the standard linear regression model applied to log abundance.
+
+The standard error in the growth rate estimate is
+\begin{align}
+  se(\hat r) = \frac{\sigma(\varepsilon)}{\sigma(t) \sqrt{n}},
+\end{align}
+where $\sigma(\varepsilon)$ is the standard deviation of the residual log measurement, $t$ is the sampling times, and $n$ is the number of samples.
+
+For daily samples from $t=1$ to $t=T$, we have that $n = T$ and that $\sigma(t) = \sqrt{(T^2-1)/12}$.
+In this case, the standard error is
+\begin{align}
+  se(\hat r)
+    &= \frac{\sqrt{12} \; \sigma(\varepsilon)}{\sqrt{T (T^2 -2)}}
+  \\&\approx \frac{\sqrt{12} \; \sigma(\varepsilon)}{T^{3/2}} \quad \text{for $T \gg 1$}.
+\end{align}
+This formula tells us that our uncertainty decreases with more days of sampling as $T^{3/2}$, with a factor $T$ coming from the increased temporal spread of sampling days and a factor $T^{1/2}$ coming from the increased number of samples.
+
+If we included technical replicates, we could increase precision without requiring more days; however, an equal increase in precision requires processing and sequencing more samples from the current range of days than adding additional samples from additional days to the range.
+
+## 2022-08-06
+
+- This calculation just tells us about the standard error; it might be interesting to extend it to consider our ability to detect positive growth.
+- increasing the number of samples on a given day can only reduce the fraction of variance that is not day-by-day, e.g. due to sample processing and sequencing.
+- should think on a graphical / analogy / schematic representation of this for the team
+
+## 2022-11-28
+
+Consider a mixture model of lognormal + Poisson noise on the counts.
+I expect that the above applies in the regime where counts are >> 1 with very high probability, and the pure Poisson theory to apply when the counts are below some threshold defined by the (geometric) standard dev of the lognormal noise.
+However, I suspect we will often be in an intermediate regime for EGD when we are first able to detect an emerging pathogen, where the multiplicative noise is sufficient that it is not uncommon for the counts to be $\lesssim 1$ and $\gg 1$ on adjacent days.
+Even if that is so, perhaps the results for the two regimes still give us useful bounds.
