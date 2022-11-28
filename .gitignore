@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+# Knitr cache for posts
+**_cache/
+# Distill site output
+_site/
