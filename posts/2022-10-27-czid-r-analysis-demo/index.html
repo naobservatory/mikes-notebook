@@ -1,0 +1,3005 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { color: #00769e; background-color: #f1f3f5; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #00769e; } /* Normal */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #657422; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #00769e; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #00769e; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #00769e; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
+<style>
+  div.csl-bib-body { }
+  div.csl-entry {
+    clear: both;
+    }
+  .hanging div.csl-entry {
+    margin-left:2em;
+    text-indent:-2em;
+  }
+  div.csl-left-margin {
+    min-width:2em;
+    float:left;
+  }
+  div.csl-right-inline {
+    margin-left:2em;
+    padding-left:1em;
+  }
+  div.csl-indent {
+    margin-left: 2em;
+  }
+</style>
+
+  <!--radix_placeholder_meta_tags-->
+<title>Mike's NAO notebook: CZID-to-R data import and analysis demo</title>
+
+<meta property="description" itemprop="description" content="Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses."/>
+
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2022-10-31"/>
+<meta property="article:created" itemprop="dateCreated" content="2022-10-31"/>
+<meta name="article:author" content="Michael R. McLaren"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="Mike&#39;s NAO notebook: CZID-to-R data import and analysis demo"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content="Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="Mike&#39;s NAO notebook"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="Mike&#39;s NAO notebook: CZID-to-R data import and analysis demo"/>
+<meta property="twitter:description" content="Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses."/>
+
+<!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=Metagenomic analysis of viruses in toilet waste from long distance flights new procedure for global infectious disease surveillance;citation_publisher=Public Library of Science;citation_volume=14;citation_doi=10.1371/journal.pone.0210368;citation_issn=1932-6203;citation_author=Mathis Hjort Hjelmsø;citation_author=Sarah Mollerup;citation_author=Randi Holm Jensen;citation_author=Carlotta Pietroni;citation_author=Oksana Lukjancenko;citation_author=Anna Charlotte Schultz;citation_author=Frank M. Aarestrup;citation_author=Anders Johannes Hansen"/>
+  <meta name="citation_reference" content="citation_title=The Biological Observation Matrix (BIOM) format or: How I learned to stop worrying and love the ome-ome;citation_volume=1;citation_doi=10.1186/2047-217X-1-7;citation_issn=2047-217X;citation_author=Daniel McDonald;citation_author=Jose C Clemente;citation_author=Justin Kuczynski;citation_author=Jai Ram Rideout;citation_author=Jesse Stombaugh;citation_author=Doug Wendel;citation_author=Andreas Wilke;citation_author=Susan Huse;citation_author=John Hufnagle;citation_author=Folker Meyer;citation_author=Rob Knight;citation_author=J Gregory Caporaso"/>
+  <meta name="citation_reference" content="citation_title=RNA Viromics of Southern California Wastewater and Detection of SARS-CoV-2 Single-Nucleotide Variants;citation_publisher=American Society for Microbiology;citation_volume=87;citation_doi=10.1128/AEM.01448-21;citation_author=Jason A. Rothman;citation_author=Theresa B. Loveless;citation_author=Joseph Kapcia;citation_author=Eric D. Adams;citation_author=Joshua A. Steele;citation_author=Amity G. Zimmer-Faust;citation_author=Kylie Langlois;citation_author=David Wanless;citation_author=Madison Griffith;citation_author=Lucy Mao;citation_author=Jeffrey Chokry;citation_author=John F. Griffith;citation_author=Katrine L. Whiteson"/>
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","categories","bibliography","date","draft","output"]}},"value":[{"type":"character","attributes":{},"value":["CZID-to-R data import and analysis demo"]},{"type":"character","attributes":{},"value":["Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses."]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Michael R. McLaren"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":[]}},"value":[]}]}]},{"type":"character","attributes":{},"value":["CZ ID","hjelmso2019meta","R"]},{"type":"character","attributes":{},"value":["../../_references.bib"]},{"type":"character","attributes":{},"value":["2022-10-31"]},{"type":"logical","attributes":{},"value":[false]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","dev","toc"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["svg"]},{"type":"logical","attributes":{},"value":[true]}]}]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["czid-r-analysis-demo_files/anchor-4.2.2/anchor.min.js","czid-r-analysis-demo_files/bowser-1.9.3/bowser.min.js","czid-r-analysis-demo_files/distill-2.2.21/template.v2.js","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-18-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-19-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-20-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-21-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-28-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-30-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-31-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-33-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-35-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-36-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-37-1.svg","czid-r-analysis-demo_files/figure-html5/unnamed-chunk-38-1.svg","czid-r-analysis-demo_files/header-attrs-2.17/header-attrs.js","czid-r-analysis-demo_files/header-attrs-2.18/header-attrs.js","czid-r-analysis-demo_files/jquery-3.6.0/jquery-3.6.0.js","czid-r-analysis-demo_files/jquery-3.6.0/jquery-3.6.0.min.js","czid-r-analysis-demo_files/jquery-3.6.0/jquery-3.6.0.min.map","czid-r-analysis-demo_files/popper-2.6.0/popper.min.js","czid-r-analysis-demo_files/tippy-6.2.7/tippy-bundle.umd.min.js","czid-r-analysis-demo_files/tippy-6.2.7/tippy-light-border.css","czid-r-analysis-demo_files/tippy-6.2.7/tippy.css","czid-r-analysis-demo_files/tippy-6.2.7/tippy.umd.min.js","czid-r-analysis-demo_files/webcomponents-2.0.0/webcomponents.js"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      tolerance: 5,
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #0F2E3D;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+  min-width: 150px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
+</style>
+
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description || ''}
+                </div>
+                <div class="search-item-preview">
+                  ${img}
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
+  font-size: 100%;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-top: 2.5rem;
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: auto;
+}
+
+d-article div.sourceCode {
+  background-color: white;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+d-article pre {
+  font-size: 12px;
+  color: black;
+  background: none;
+  margin-top: 0;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
+@media(min-width: 768px) {
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+/* tweak for Pandoc numbered line within distill */
+d-article pre.numberSource code > span {
+    left: -2em;
+}
+
+d-article pre {
+  font-size: 14px;
+}
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
+}
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme, except when numbering line
+  // in code chunk
+  $('pre:not(.numberLines) code.sourceCode a:empty').remove();
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      const citeChild = $(this).children()[0]
+      // Do not process if @xyz has been used without escaping and without bibliography activated
+      // https://github.com/rstudio/distill/issues/466
+      if (citeChild === undefined) return true
+
+      if (citeChild.nodeName == "D-FOOTNOTE") {
+        var fn = citeChild
+        $(this).html(fn.shadowRoot.querySelector("sup"))
+        $(this).id = fn.id
+        fn.remove()
+      }
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        // Could use CSS.escape too here, we insure backward compatibility in navigator
+        return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+      }).join("\n");
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
+
+    // fix footnotes in tables (#411)
+    // replacing broken distill.pub feature
+    $('table d-footnote').each(function() {
+      // we replace internal showAtNode methode which is triggered when hovering a footnote
+      this.hoverBox.showAtNode = function(node) {
+        // ported from https://github.com/distillpub/template/pull/105/files
+        calcOffset = function(elem) {
+            let x = elem.offsetLeft;
+            let y = elem.offsetTop;
+            // Traverse upwards until an `absolute` element is found or `elem`
+            // becomes null.
+            while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                x += elem.offsetLeft;
+                y += elem.offsetTop;
+            }
+
+            return { left: x, top: y };
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+        const bbox = node.getBoundingClientRect();
+        const offset = calcOffset(node);
+        this.show([offset.left + bbox.width, offset.top + bbox.height]);
+      }
+    })
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-contents').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    // ignore leaflet img layers (#106)
+    figures = figures.filter(':not(img[class*="leaflet"])')
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.18/header-attrs.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"CZID-to-R data import and analysis demo","description":"Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses.","authors":[{"author":"Michael R. McLaren","authorURL":{},"affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2022-10-31T00:00:00.000-04:00","citationText":"McLaren, 2022"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a href="../../index.html" class="title">Mike's NAO notebook</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
+</div>
+<div class="nav-right">
+<a href="../../index.html">Home</a>
+<a href="../../about.html">About</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>CZID-to-R data import and analysis demo</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:CZ_ID" class="dt-tag">CZ ID</a>
+  <a href="../../index.html#category:hjelmso2019meta" class="dt-tag">hjelmso2019meta</a>
+  <a href="../../index.html#category:R" class="dt-tag">R</a>
+</div>
+<!--/radix_placeholder_categories-->
+<p><p>Demonstration of how to import taxonomic profiles from CZID into R and do a few basic analyses.</p></p>
+</div>
+
+<div class="d-byline">
+  Michael R. McLaren true 
+  
+<br/>2022-10-31
+</div>
+
+<div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#r-setup" id="toc-r-setup">R setup</a></li>
+<li><a href="#data-import" id="toc-data-import">Data import</a>
+<ul>
+<li><a href="#from-a-biom-file-hjelmso2019meta-data" id="toc-from-a-biom-file-hjelmso2019meta-data">From a BIOM file (<span class="citation" data-cites="hjelmso2019meta">Hjelmsø et al. (2019)</span> data)</a>
+<ul>
+<li><a href="#create-a-phyloseq-object" id="toc-create-a-phyloseq-object">Create a phyloseq object</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#basic-data-checks-and-stats" id="toc-basic-data-checks-and-stats">Basic data checks and stats</a>
+<ul>
+<li><a href="#taxonomy" id="toc-taxonomy">Taxonomy</a></li>
+</ul></li>
+<li><a href="#analysis" id="toc-analysis">Analysis</a>
+<ul>
+<li><a href="#recreating-figure-4-from-rothman2021rnav-using-the-hjelmso-data" id="toc-recreating-figure-4-from-rothman2021rnav-using-the-hjelmso-data">Recreating Figure 4 from <span class="citation" data-cites="rothman2021rnav">Rothman et al. (2021)</span> using the Hjelmso data</a>
+<ul>
+<li><a href="#bray-curtis-nmds-ordination-panel-a" id="toc-bray-curtis-nmds-ordination-panel-a">Bray-Curtis NMDS ordination (Panel A)</a></li>
+<li><a href="#alpha-diversity-panel-b" id="toc-alpha-diversity-panel-b">Alpha diversity (Panel B)</a></li>
+<li><a href="#relative-abundances-proportions-panel-c" id="toc-relative-abundances-proportions-panel-c">Relative abundances (Proportions) (Panel C)</a></li>
+<li><a href="#put-the-panels-together" id="toc-put-the-panels-together">Put the panels together</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</div>
+<h1 id="r-setup">R setup</h1>
+<p>Start by loading some useful R packages,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># set of data analysis and viz tools</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># file system helpers</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://fs.r-lib.org'>fs</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># specifying locations within a project</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://here.r-lib.org/'>here</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># microbiome analysis helpers</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/joey711/biomformat/'>biomformat</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mikemc.github.io/speedyseq'>speedyseq</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># plotting helpers</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://wilkelab.org/cowplot/'>cowplot</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://patchwork.data-imaginist.com'>patchwork</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/eclarke/ggbeeswarm'>ggbeeswarm</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme_get.html'>theme_set</a></span><span class='op'>(</span><span class='fu'><a href='https://wilkelab.org/cowplot/reference/theme_cowplot.html'>theme_cowplot</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>Here I’ll work with the BIOM file generated from the <span class="citation" data-cites="hjelmso2019meta">Hjelmsø et al. (<a href="#ref-hjelmso2019meta" role="doc-biblioref">2019</a>)</span> taxonomic profiles.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>hjelmso_data_path</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"_data/hjelmso2019meta/czid"</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://fs.r-lib.org/reference/dir_ls.html'>dir_ls</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>path_file</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;2022-11-07_combined_microbiome_file_nt_r.biom&quot;      
+[2] &quot;2022-11-07_combined_microbiome_file_nt_r_fixed.biom&quot;</code></pre>
+</div>
+<h1 id="data-import">Data import</h1>
+<h2 id="from-a-biom-file-hjelmso2019meta-data">From a BIOM file (<span class="citation" data-cites="hjelmso2019meta">Hjelmsø et al. (<a href="#ref-hjelmso2019meta" role="doc-biblioref">2019</a>)</span> data)</h2>
+<p>The BIOM format (<a href="https://biom-format.org/" class="uri">https://biom-format.org/</a>, <span class="citation" data-cites="mcdonald2012theb">McDonald et al. (<a href="#ref-mcdonald2012theb" role="doc-biblioref">2012</a>)</span>) is a file format for including the abundance matrix, taxonomy, and sample metadata all in one file.
+BIOM export from CZID is supported but listed as being in Beta.</p>
+<p>If we try reading in the file as directly exported from CZID, we get an error</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biom</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, <span class='st'>'2022-11-07_combined_microbiome_file_nt_r.biom'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/read_biom.html'>read_biom</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>Error in validObject(.Object): invalid class &quot;biom&quot; object: type field has unsupported value</code></pre>
+</div>
+<!-- ``` -->
+<!-- Error in validObject(.Object) :  -->
+<!--   invalid class “biom” object: type field has unsupported value -->
+<!-- ``` -->
+<p>This error arises because the ‘type’ of the data object defined in the JSON-formatted contents of the .biom file isn’t valid as per the biom format v1.0 specs, see <a href="https://biom-format.org/documentation/format_versions/biom-1.0.html" class="uri">https://biom-format.org/documentation/format_versions/biom-1.0.html</a>.</p>
+<p>We can see this by opening up the file and looking for the type argument towards the beginning; or looking at the top items in the list after reading in the file with a JSON parser.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biom_json</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, </span>
+<span>  <span class='st'>'2022-11-07_combined_microbiome_file_nt_r.biom'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'>jsonlite</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jsonlite/man/read_json.html'>read_json</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>biom_json</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>9</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>$id
+[1] &quot;None&quot;
+
+$format
+[1] &quot;Biological Observation Matrix 1.0.0&quot;
+
+$format_url
+[1] &quot;http://biom-format.org&quot;
+
+$matrix_type
+[1] &quot;sparse&quot;
+
+$generated_by
+[1] &quot;BIOM-Format 2.1.12&quot;
+
+$date
+[1] &quot;2022-11-07T20:37:42.385642&quot;
+
+$type
+[1] &quot;Table&quot;
+
+$matrix_element_type
+[1] &quot;float&quot;
+
+$shape
+$shape[[1]]
+[1] 25495
+
+$shape[[2]]
+[1] 85</code></pre>
+</div>
+<p>We can fix the file by changing the type from ‘Table’ to something valid.
+It doesn’t actually matter what we use:</p>
+<blockquote>
+<p>While type is a required entry in BIOM tables, the BIOM format itself does not change for different data types (e.g., OTU Table, function table, metabolite table). This information is included to allow tools that use BIOM files to determine the data type, if desired. (Caption for Additional file 5 in <span class="citation" data-cites="mcdonald2012theb">McDonald et al. (<a href="#ref-mcdonald2012theb" role="doc-biblioref">2012</a>)</span>)</p>
+</blockquote>
+<p>Let’s use ‘Taxon table’.
+The following code chunk should do the trick but is very slow, apparently because the jsonlite package is slow to work with large lists/files.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biom_json</span><span class='op'>$</span><span class='va'>type</span> <span class='op'>&lt;-</span> <span class='st'>'Taxon table'</span></span>
+<span><span class='fu'>jsonlite</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jsonlite/man/read_json.html'>write_json</a></span><span class='op'>(</span></span>
+<span>  <span class='va'>biom_json</span>,</span>
+<span>  <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, <span class='st'>'2022-11-07_combined_microbiome_file_nt_r_fixed.biom'</span><span class='op'>)</span></span>
+<span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>So I’ll instead simply replace the offending text.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biom_text</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, <span class='st'>'2022-11-07_combined_microbiome_file_nt_r.biom'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>read_file</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/stopifnot.html'>stopifnot</a></span><span class='op'>(</span> <span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>biom_text</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_count.html'>str_count</a></span><span class='op'>(</span><span class='st'>'"Table"'</span><span class='op'>)</span>, <span class='fl'>1L</span><span class='op'>)</span> <span class='op'>)</span></span>
+<span><span class='va'>biom_text_fixed</span> <span class='op'>&lt;-</span> <span class='va'>biom_text</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='st'>'"Table"'</span>, <span class='st'>'"Taxon table"'</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://readr.tidyverse.org/reference/read_file.html'>write_file</a></span><span class='op'>(</span></span>
+<span>  <span class='va'>biom_text_fixed</span>,</span>
+<span>  <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, <span class='st'>'2022-11-07_combined_microbiome_file_nt_r_fixed.biom'</span><span class='op'>)</span></span>
+<span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>The above chunk reads in the BIOM file’s contents as a single string, checks that ‘“Table”’ appears only once (in the field where it is set as the type), then replaces it with ‘“Taxon table”’), then writes the string as a new BIOM file.
+We should now be able to load the corrected BIOM file with the biomformat package,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biom</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://fs.r-lib.org/reference/path.html'>path</a></span><span class='op'>(</span><span class='va'>hjelmso_data_path</span>, <span class='st'>'2022-11-07_combined_microbiome_file_nt_r_fixed.biom'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/read_biom.html'>read_biom</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>print</span></span></code></pre>
+</div>
+<pre><code>biom object. 
+type: Taxon table 
+matrix_type: sparse 
+25495 rows and 85 columns </code></pre>
+</div>
+<p>Note: For most objects in R, the <code>print()</code> and <code>glimpse()</code> methods silently return the object as well as printing information about it.
+Adding a <code>print</code> or <code>glimpse</code> call at the end of a variable-assignment pipe chain is a succinct way to save an object and show some info about it.</p>
+<h3 id="create-a-phyloseq-object">Create a phyloseq object</h3>
+<p>The abundance (count) matrix, sample metadata table, and taxonomy table can be extracted with three corresponding functions functions from the biomformat package.</p>
+<p>We’ll tackle these one at a time.</p>
+<p>First, the abundance matrix.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>abun</span> <span class='op'>&lt;-</span> <span class='va'>biom</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/biom_data-methods.html'>biom_data</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>abun</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>class</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;dgCMatrix&quot;
+attr(,&quot;package&quot;)
+[1] &quot;Matrix&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>abun</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>dim</span></span></code></pre>
+</div>
+<pre><code>[1] 25495    85</code></pre>
+</div>
+<p>The abundance matrix is stored as a sparse matrix from the Matrix package.
+That is fine for now, though phyloseq will want a standard (dense) matrix.</p>
+<p>Next, the sample metadata.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam</span> <span class='op'>&lt;-</span> <span class='va'>biom</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/sample_metadata-methods.html'>sample_metadata</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>sam</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>class</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;data.frame&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>head</span></span></code></pre>
+</div>
+<pre><code>                      sample_type nucleotide_type collection_date
+ERR3026532:288969 Airplane sewage             RNA         2013-01
+ERR3026500:288937 Airplane sewage             RNA         2013-01
+ERR3026576:289013 Airplane sewage             RNA         2013-01
+ERR3026559:288996 Airplane sewage             RNA         2013-01
+ERR3026571:289008 Airplane sewage             RNA         2013-01
+ERR3026512:288949 Airplane sewage             RNA         2013-01
+                  water_control collection_location isolate
+ERR3026532:288969            No            Pakistan      No
+ERR3026500:288937            No               China      No
+ERR3026576:289013            No             Denmark      No
+ERR3026559:288996            No              Canada      No
+ERR3026571:289008            No             Denmark      No
+ERR3026512:288949            No               Japan      No
+                   Study Sample Name
+ERR3026532:288969      Islamabad_2_c
+ERR3026500:288937        Beijing_2_e
+ERR3026576:289013    Library_blank_a
+ERR3026559:288996          Toronto_e
+ERR3026571:289008 Negative_control_a
+ERR3026512:288949          Tokyo_1_d</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 85
+Columns: 7
+$ sample_type         &lt;chr&gt; &quot;Airplane sewage&quot;, &quot;Airplane sewage&quot;, &quot;A…
+$ nucleotide_type     &lt;chr&gt; &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;…
+$ collection_date     &lt;chr&gt; &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-0…
+$ water_control       &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ collection_location &lt;chr&gt; &quot;Pakistan&quot;, &quot;China&quot;, &quot;Denmark&quot;, &quot;Canada&quot;…
+$ isolate             &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ `Study Sample Name` &lt;chr&gt; &quot;Islamabad_2_c&quot;, &quot;Beijing_2_e&quot;, &quot;Library…</code></pre>
+</div>
+<p>The sample metadata is a standard data frame with rownames giving sample ids, and the taxonomy information is stored as a list.
+Notice how all the variable names are in snake case except for one.
+This is apparently because the CZID BIOM exports its own standard variables as snake case (though shows them otherwise in the online interface), but leaves custom variables unchanged.
+It is convinient to standardize all variable names to snake case; an easy way to do this is with the function <code>janitor::clean_names()</code>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam</span> <span class='op'>&lt;-</span> <span class='va'>sam</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'>janitor</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/janitor/man/clean_names.html'>clean_names</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 85
+Columns: 7
+$ sample_type         &lt;chr&gt; &quot;Airplane sewage&quot;, &quot;Airplane sewage&quot;, &quot;A…
+$ nucleotide_type     &lt;chr&gt; &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;…
+$ collection_date     &lt;chr&gt; &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-0…
+$ water_control       &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ collection_location &lt;chr&gt; &quot;Pakistan&quot;, &quot;China&quot;, &quot;Denmark&quot;, &quot;Canada&quot;…
+$ isolate             &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ study_sample_name   &lt;chr&gt; &quot;Islamabad_2_c&quot;, &quot;Beijing_2_e&quot;, &quot;Library…</code></pre>
+</div>
+<p>Next, the taxonomy table, or what the biomformat package calls the ‘observation metadata’.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'>&lt;-</span> <span class='va'>biom</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/observation_metadata-methods.html'>observation_metadata</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>class</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;list&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>$`Bacteria;;Proteobacteria;Alphaproteobacteria;Rhizobiales;Xanthobacteraceae;Azorhizobium;Azorhizobium caulinodans`
+                 taxonomy1                  taxonomy2 
+                &quot;Bacteria&quot;                         &quot;&quot; 
+                 taxonomy3                  taxonomy4 
+          &quot;Proteobacteria&quot;      &quot;Alphaproteobacteria&quot; 
+                 taxonomy5                  taxonomy6 
+             &quot;Rhizobiales&quot;        &quot;Xanthobacteraceae&quot; 
+                 taxonomy7                  taxonomy8 
+            &quot;Azorhizobium&quot; &quot;Azorhizobium caulinodans&quot; 
+
+$`Bacteria;;Proteobacteria;Gammaproteobacteria;Enterobacterales;Erwiniaceae;Buchnera;Buchnera aphidicola`
+            taxonomy1             taxonomy2             taxonomy3 
+           &quot;Bacteria&quot;                    &quot;&quot;      &quot;Proteobacteria&quot; 
+            taxonomy4             taxonomy5             taxonomy6 
+&quot;Gammaproteobacteria&quot;    &quot;Enterobacterales&quot;         &quot;Erwiniaceae&quot; 
+            taxonomy7             taxonomy8 
+           &quot;Buchnera&quot; &quot;Buchnera aphidicola&quot; </code></pre>
+</div>
+<p>We can see that here we have a list, with one element per taxon.
+The documentation for <code>biomformat::observation_metadata</code> indicates that this function may return a ‘data.frame’ rather than a list, if it is able to, but does not say under what conditions that will be the case.
+Ultimately we want a data frame (or tibble).
+The following code chunk checks which we have, and if we have a list, tries to turn it into a data frame by spreading out the taxonomy vector of each list element into a table.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax_tmp</span> <span class='op'>&lt;-</span> <span class='va'>biom</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/pkg/biomformat/man/observation_metadata-methods.html'>observation_metadata</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='kw'>if</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/as.data.frame.html'>is.data.frame</a></span><span class='op'>(</span><span class='va'>tax_tmp</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span>  <span class='va'>tax</span> <span class='op'>&lt;-</span> <span class='va'>tax_tmp</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://tibble.tidyverse.org/reference/as_tibble.html'>as_tibble</a></span><span class='op'>(</span>rownames <span class='op'>=</span> <span class='st'>'.otu'</span><span class='op'>)</span></span>
+<span><span class='op'>}</span> <span class='kw'>else</span> <span class='op'>{</span></span>
+<span>  <span class='va'>tax</span> <span class='op'>&lt;-</span> <span class='va'>tax_tmp</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>    <span class='fu'><a href='https://tibble.tidyverse.org/reference/enframe.html'>enframe</a></span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'feature_id'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>    <span class='fu'><a href='https://tidyr.tidyverse.org/reference/hoist.html'>unnest_wider</a></span><span class='op'>(</span><span class='va'>value</span><span class='op'>)</span></span>
+<span><span class='op'>}</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>tax_tmp</span><span class='op'>)</span></span>
+<span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 25,495
+Columns: 9
+$ feature_id &lt;chr&gt; &quot;Bacteria;;Proteobacteria;Alphaproteobacteria;Rhi…
+$ taxonomy1  &lt;chr&gt; &quot;Bacteria&quot;, &quot;Bacteria&quot;, &quot;Bacteria&quot;, &quot;Bacteria&quot;, &quot;…
+$ taxonomy2  &lt;chr&gt; &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;…
+$ taxonomy3  &lt;chr&gt; &quot;Proteobacteria&quot;, &quot;Proteobacteria&quot;, &quot;Actinobacter…
+$ taxonomy4  &lt;chr&gt; &quot;Alphaproteobacteria&quot;, &quot;Gammaproteobacteria&quot;, &quot;Ac…
+$ taxonomy5  &lt;chr&gt; &quot;Rhizobiales&quot;, &quot;Enterobacterales&quot;, &quot;Micrococcales…
+$ taxonomy6  &lt;chr&gt; &quot;Xanthobacteraceae&quot;, &quot;Erwiniaceae&quot;, &quot;Cellulomonad…
+$ taxonomy7  &lt;chr&gt; &quot;Azorhizobium&quot;, &quot;Buchnera&quot;, &quot;Cellulomonas&quot;, &quot;Dict…
+$ taxonomy8  &lt;chr&gt; &quot;Azorhizobium caulinodans&quot;, &quot;Buchnera aphidicola&quot;…</code></pre>
+</div>
+<p>To facilitate downstream analysis, it is helpful to so some cleanup:</p>
+<ul>
+<li>Replace the taxonomic ranks with the standard NCBI rank names (see an example <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9606">NCBI taxonomic record</a>)</li>
+<li>In cases where the rank is missing/unassigned, replace the empty string with NA
+<!--  --></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rnks</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'superkingdom'</span>, <span class='st'>'kingdom'</span>, <span class='st'>'phylum'</span>, <span class='st'>'class'</span>, <span class='st'>'order'</span>, <span class='st'>'family'</span>,</span>
+<span>  <span class='st'>'genus'</span>, <span class='st'>'species'</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>tax</span><span class='op'>)</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='va'>rnks</span></span>
+<span><span class='co'># use NA for missing ranks</span></span>
+<span><span class='va'>tax</span> <span class='op'>&lt;-</span> <span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='fu'><a href='https://tidyselect.r-lib.org/reference/everything.html'>everything</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='op'>~</span><span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>.</span> <span class='op'>==</span> <span class='st'>""</span>, <span class='cn'>NA_character_</span>, <span class='va'>.</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span>
+<span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 25,495
+Columns: 9
+$ feature_id   &lt;chr&gt; &quot;Bacteria;;Proteobacteria;Alphaproteobacteria;R…
+$ superkingdom &lt;chr&gt; &quot;Bacteria&quot;, &quot;Bacteria&quot;, &quot;Bacteria&quot;, &quot;Bacteria&quot;,…
+$ kingdom      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ phylum       &lt;chr&gt; &quot;Proteobacteria&quot;, &quot;Proteobacteria&quot;, &quot;Actinobact…
+$ class        &lt;chr&gt; &quot;Alphaproteobacteria&quot;, &quot;Gammaproteobacteria&quot;, &quot;…
+$ order        &lt;chr&gt; &quot;Rhizobiales&quot;, &quot;Enterobacterales&quot;, &quot;Micrococcal…
+$ family       &lt;chr&gt; &quot;Xanthobacteraceae&quot;, &quot;Erwiniaceae&quot;, &quot;Cellulomon…
+$ genus        &lt;chr&gt; &quot;Azorhizobium&quot;, &quot;Buchnera&quot;, &quot;Cellulomonas&quot;, &quot;Di…
+$ species      &lt;chr&gt; &quot;Azorhizobium caulinodans&quot;, &quot;Buchnera aphidicol…</code></pre>
+</div>
+<p>Now let’s import all three tables into a single phyloseq object.
+This involves converting each individual table into the corresponding class from the phyloseq package, and then combiningg these into one phyloseq-class object.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/phyloseq.html'>phyloseq</a></span><span class='op'>(</span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/otu_table-methods.html'>otu_table</a></span><span class='op'>(</span><span class='va'>abun</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as.matrix</span>, taxa_are_rows <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,</span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html'>sample_data</a></span><span class='op'>(</span><span class='va'>sam</span><span class='op'>)</span>,</span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/tax_table-methods.html'>tax_table</a></span><span class='op'>(</span><span class='va'>tax</span><span class='op'>)</span></span>
+<span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>Note that we had to first coerce the abundance matrix to a standard dense matrix; we also needed to tell phyloseq that taxa corresponded to rows in the matrix.</p>
+<h1 id="basic-data-checks-and-stats">Basic data checks and stats</h1>
+<p>TODO: explain below</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps</span> <span class='op'>&lt;-</span> <span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/mutate-phyloseq.html'>mutate_sample_data</a></span><span class='op'>(</span><span class='va'>.</span>, </span>
+<span>    sample_sum <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/sample_sums.html'>sample_sums</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span>
+<span><span class='va'>sam</span> <span class='op'>&lt;-</span> <span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sample_data</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as_tibble</span></span>
+<span><span class='va'>tax</span> <span class='op'>&lt;-</span> <span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>tax_table</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as_tibble</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>t</span></span></code></pre>
+</div>
+<pre><code>phyloseq-class experiment-level object
+otu_table()   OTU Table:          [ 25495 taxa and 85 samples ]:
+sample_data() Sample Data:        [ 85 samples by 8 sample variables ]:
+tax_table()   Taxonomy Table:     [ 25495 taxa by 8 taxonomic ranks ]:
+taxa are columns</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sample_names</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>head</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;ERR3026532:288969&quot; &quot;ERR3026500:288937&quot; &quot;ERR3026576:289013&quot;
+[4] &quot;ERR3026559:288996&quot; &quot;ERR3026571:289008&quot; &quot;ERR3026512:288949&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sample_data</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 85
+Columns: 8
+$ sample_type         &lt;chr&gt; &quot;Airplane sewage&quot;, &quot;Airplane sewage&quot;, &quot;A…
+$ nucleotide_type     &lt;chr&gt; &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;, &quot;RNA&quot;…
+$ collection_date     &lt;chr&gt; &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-01&quot;, &quot;2013-0…
+$ water_control       &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ collection_location &lt;chr&gt; &quot;Pakistan&quot;, &quot;China&quot;, &quot;Denmark&quot;, &quot;Canada&quot;…
+$ isolate             &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;, &quot;No&quot;…
+$ study_sample_name   &lt;chr&gt; &quot;Islamabad_2_c&quot;, &quot;Beijing_2_e&quot;, &quot;Library…
+$ sample_sum          &lt;dbl&gt; 83328, 188401, 313204, 234338, 767843, 5…</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>sample_sum</span>, fill <span class='op'>=</span> <span class='va'>collection_location</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_continuous.html'>scale_x_log10</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_histogram.html'>geom_histogram</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-19-1.svg" width="1950" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>taxon_stats</span> <span class='op'>&lt;-</span> <span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>as_tibble</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='va'>superkingdom</span>, <span class='va'>fct_explicit_na</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/with_groups.html'>with_groups</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>.otu</span>, <span class='va'>superkingdom</span><span class='op'>)</span>, <span class='va'>summarize</span>, </span>
+<span>    prev_1 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.abundance</span> <span class='op'>&gt;=</span> <span class='fl'>1</span><span class='op'>)</span>,</span>
+<span>    prev_10 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.abundance</span> <span class='op'>&gt;=</span> <span class='fl'>10</span><span class='op'>)</span>,</span>
+<span>    total <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.abundance</span><span class='op'>)</span>,</span>
+<span>    proportion <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>.abundance</span> <span class='op'>/</span> <span class='va'>sample_sum</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>taxon_stats</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/pivot_longer.html'>pivot_longer</a></span><span class='op'>(</span><span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>.otu</span>, <span class='va'>superkingdom</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>value</span>, fill <span class='op'>=</span> <span class='va'>superkingdom</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>name</span>, scales <span class='op'>=</span> <span class='st'>'free'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_continuous.html'>scale_x_log10</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_brewer.html'>scale_fill_brewer</a></span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>'qual'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_histogram.html'>geom_histogram</a></span><span class='op'>(</span><span class='op'>)</span> </span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-21-1.svg" width="1950" /></p>
+</div>
+<h2 id="taxonomy">Taxonomy</h2>
+<p>NCBI taxonomy has recently received changes in some prokaryotic phylum names.
+Let’s check to see which version of phylum names are being used here, by seeing whether a Bacteroides species’ phylum is listed as ‘Bacteroidetes’ (old name) or ‘Bacteroidota’ (new name).</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>genus</span> <span class='op'>==</span> <span class='st'>'Bacteroides'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/slice.html'>slice</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span><span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>glimpse</span></span></code></pre>
+</div>
+<pre><code>Rows: 1
+Columns: 9
+$ .otu         &lt;chr&gt; &quot;Bacteria;;Bacteroidetes;Bacteroidia;Bacteroida…
+$ superkingdom &lt;chr&gt; &quot;Bacteria&quot;
+$ kingdom      &lt;chr&gt; NA
+$ phylum       &lt;chr&gt; &quot;Bacteroidetes&quot;
+$ class        &lt;chr&gt; &quot;Bacteroidia&quot;
+$ order        &lt;chr&gt; &quot;Bacteroidales&quot;
+$ family       &lt;chr&gt; &quot;Bacteroidaceae&quot;
+$ genus        &lt;chr&gt; &quot;Bacteroides&quot;
+$ species      &lt;chr&gt; &quot;Bacteroides fragilis&quot;</code></pre>
+</div>
+<p>If we look at <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=1263047">this taxon in NCBI taxonomy</a>, we can see that NCBI has adopted the new phylum name ‘Bacteroidota’; however, here we see the old phylum name.
+This suggests that CZID is currently using an older version of NCBI prior to the name change.</p>
+<p>see
+- <a href="https://ncbiinsights.ncbi.nlm.nih.gov/2021/12/10/ncbi-taxonomy-prokaryote-phyla-added/" class="uri">https://ncbiinsights.ncbi.nlm.nih.gov/2021/12/10/ncbi-taxonomy-prokaryote-phyla-added/</a>
+- <a href="https://www.the-scientist.com/news-opinion/newly-renamed-prokaryote-phyla-cause-uproar-69578" class="uri">https://www.the-scientist.com/news-opinion/newly-renamed-prokaryote-phyla-cause-uproar-69578</a>
+<!--  --></p>
+<p>Check classification percentages</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/pivot_longer.html'>pivot_longer</a></span><span class='op'>(</span><span class='op'>-</span><span class='va'>.otu</span>, names_to <span class='op'>=</span> <span class='st'>'rank'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/with_groups.html'>with_groups</a></span><span class='op'>(</span><span class='va'>rank</span>, <span class='va'>summarize</span>,</span>
+<span>    features_classified <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>value</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span>    features_total <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    frac_classified <span class='op'>=</span> <span class='va'>features_classified</span> <span class='op'>/</span> <span class='va'>features_total</span>,</span>
+<span>    rank <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>rank</span>, <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/rank_names.html'>rank_names</a></span><span class='op'>(</span><span class='va'>ps</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='va'>rank</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 8 × 4
+  rank         features_classified features_total frac_classified
+  &lt;fct&gt;                      &lt;int&gt;          &lt;int&gt;           &lt;dbl&gt;
+1 superkingdom               25381          25495           0.996
+2 kingdom                     4995          25495           0.196
+3 phylum                     22667          25495           0.889
+4 class                      22119          25495           0.868
+5 order                      22199          25495           0.871
+6 family                     21744          25495           0.853
+7 genus                      20649          25495           0.810
+8 species                    25493          25495           1.00 </code></pre>
+</div>
+<p>This analysis points to some notable features of the data.
+For example, not every taxonomic feature has a superkingdom.
+Let’s take a look at some of those ‘species’ that don’t,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span></span>
+<span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>superkingdom</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>superkingdom</span>, <span class='va'>kingdom</span>, <span class='va'>genus</span>, <span class='va'>species</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/slice.html'>slice_sample</a></span><span class='op'>(</span>n<span class='op'>=</span><span class='fl'>20</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 20 × 4
+   superkingdom kingdom genus species                                 
+   &lt;chr&gt;        &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;                                   
+ 1 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pPKm-230                 
+ 2 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pMT450                   
+ 3 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Vector pAAV-hSyn1-FLEX-GAP43-GCaMP6s-P2…
+ 4 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  uncultured microorganism                
+ 5 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector shRNA EYFP-P2A Puro      
+ 6 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pMT449                   
+ 7 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  IncQ plasmid pIE1120                    
+ 8 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pHal7-FAPG462VRFP        
+ 9 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Shuttle vector pG106                    
+10 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  uncultured gut microbe of Zootermopsis …
+11 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Vector EP-Pol                           
+12 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pRGPDuo4                 
+13 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector IA5_YQR_DIMER            
+14 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Plasmid pMCBF1                          
+15 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Plasmid pM3                             
+16 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  uncultured marine organism              
+17 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Transposon Tn4551                       
+18 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Sphinx1.76-related DNA                  
+19 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  Cloning vector pMT451                   
+20 &lt;NA&gt;         &lt;NA&gt;    &lt;NA&gt;  uncultured marine microorganism         </code></pre>
+</div>
+<p>Can see that CZID report reference sequences that are in NT but don’t corresopnd to known organisms.</p>
+<p>What about ‘species’ without intermediate ranks?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>superkingdom</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>family</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>superkingdom</span>, <span class='va'>kingdom</span>, <span class='va'>phylum</span>, <span class='va'>family</span>, <span class='va'>genus</span>, <span class='va'>species</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/slice.html'>slice_sample</a></span><span class='op'>(</span>n<span class='op'>=</span><span class='fl'>20</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 20 × 6
+   superkingdom kingdom phylum          family genus           species
+   &lt;chr&gt;        &lt;chr&gt;   &lt;chr&gt;           &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;  
+ 1 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+ 2 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            swine …
+ 3 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+ 4 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            butyra…
+ 5 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            bacter…
+ 6 Bacteria     &lt;NA&gt;    Chloroflexi     &lt;NA&gt;   Dehalogenimonas Dehalo…
+ 7 Bacteria     &lt;NA&gt;    Proteobacteria  &lt;NA&gt;   &lt;NA&gt;            alpha …
+ 8 Eukaryota    &lt;NA&gt;    Bacillariophyta &lt;NA&gt;   &lt;NA&gt;            uncult…
+ 9 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            bacter…
+10 Bacteria     &lt;NA&gt;    Actinobacteria  &lt;NA&gt;   &lt;NA&gt;            actino…
+11 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            bacter…
+12 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+13 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+14 Bacteria     &lt;NA&gt;    Proteobacteria  &lt;NA&gt;   &lt;NA&gt;            arseni…
+15 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+16 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+17 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            bacter…
+18 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+19 Archaea      &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…
+20 Bacteria     &lt;NA&gt;    &lt;NA&gt;            &lt;NA&gt;   &lt;NA&gt;            uncult…</code></pre>
+</div>
+<p>Can also see cases where a species does not have an intermediate rank defined, such as family.
+Having NA for intermediate ranks could cause issues, and we might consider replacing these with a new string such as ‘Enterobacterales_unclassified’.</p>
+<p>How do features break down by superkingdom?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tax</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='va'>superkingdom</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>fraction <span class='op'>=</span> <span class='va'>n</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 5 × 3
+  superkingdom     n fraction
+  &lt;chr&gt;        &lt;int&gt;    &lt;dbl&gt;
+1 Archaea        391  0.0153 
+2 Bacteria     16583  0.650  
+3 Eukaryota     5655  0.222  
+4 Viruses       2752  0.108  
+5 &lt;NA&gt;           114  0.00447</code></pre>
+</div>
+<h1 id="analysis">Analysis</h1>
+<h2 id="recreating-figure-4-from-rothman2021rnav-using-the-hjelmso-data">Recreating Figure 4 from <span class="citation" data-cites="rothman2021rnav">Rothman et al. (<a href="#ref-rothman2021rnav" role="doc-biblioref">2021</a>)</span> using the Hjelmso data</h2>
+<p>Figure 4 from <span class="citation" data-cites="rothman2021rnav">Rothman et al. (<a href="#ref-rothman2021rnav" role="doc-biblioref">2021</a>)</span> combines three common types of plots in microbiome analysis: An ordination plot to visualize the similarities and differences between samples, a plot showing the distribution of an alpha diversity metric (Shannon index) across samples, and the proportions (relative abundance) of particular species across samples (faceted by species).
+Here I’ll show how to (mostly) recreate this plot using the Hjelmso data.</p>
+<p>First, we’ll filter out some samples and taxa, which is a typical first step to any analysis.
+There is a lot more to say about how you might do said filtering; but here I’ll</p>
+<ul>
+<li>Remove samples with very low read counts, since the low read counts can be a sign of experimental issues with those samples and can skew interpretation of some analyses</li>
+<li>Subset to just viruses (the Rothman analysis only considers viruses)</li>
+<li>Remove species not appearing in at least 2 samples and 10 reads, which will speed up calculations and likely make our results more meaningful since these identifications can easily be spurious.</li>
+<li>Aggregate to the genus level
+<!--  --></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps_plot</span> <span class='op'>&lt;-</span> <span class='va'>ps</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/filter-phyloseq.html'>filter_sample_data</a></span><span class='op'>(</span><span class='va'>sample_sum</span> <span class='op'>&gt;</span> <span class='fl'>1e5</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/filter-phyloseq.html'>filter_tax_table</a></span><span class='op'>(</span><span class='va'>superkingdom</span> <span class='op'>==</span> <span class='st'>'Viruses'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/filter_taxa.html'>filter_taxa2</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'>&gt;</span> <span class='fl'>2</span> <span class='op'>&amp;</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span> <span class='op'>&gt;=</span> <span class='fl'>10</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/tax_glom.html'>tax_glom</a></span><span class='op'>(</span><span class='st'>'genus'</span>, NArm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>print</span></span></code></pre>
+</div>
+<pre><code>phyloseq-class experiment-level object
+otu_table()   OTU Table:          [ 110 taxa and 84 samples ]:
+sample_data() Sample Data:        [ 84 samples by 8 sample variables ]:
+tax_table()   Taxonomy Table:     [ 110 taxa by 8 taxonomic ranks ]:
+taxa are rows</code></pre>
+</div>
+<p>Now there are only 110 species being considered, compared to 25495 in the entire CZID output.</p>
+<p>Note that taxa with a missing genus name have been filtered out; this is the phyloseq default but it can have big effects so need to be aware and consider whether this is desired for a given analysis.</p>
+<p>Note, the names of the taxonomic features after aggregation are set to the name of the most abundant feature within the genus; they are not automatically set to the genus name.
+That is easy to do manually, provided that you have unique genus names (which is not always the case).
+It can be useful to check if the genus names are unique for plotting by genus later on,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ps_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>tax_table</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as_tibble</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/pull.html'>pull</a></span><span class='op'>(</span><span class='va'>genus</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>anyDuplicated</span></span></code></pre>
+</div>
+<pre><code>[1] 0</code></pre>
+</div>
+<p>There are no duplicates, so we can uniquely refer to taxa by genus name.</p>
+<h3 id="bray-curtis-nmds-ordination-panel-a">Bray-Curtis NMDS ordination (Panel A)</h3>
+<p>There are many ways to do this; here I’ll use the <code>ordinate()</code> and <code>plot_ordination()</code> helper function from phyloseq to create the NMDS plot using the Bray-Curtis community dissimilarity metric.
+Note, that it is important to manually normalize the abundances to have the same total in each sample (e.g. by normalizing to proportions, as done here), otherwise the different total counts across samples will affect the results.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>nmds</span> <span class='op'>&lt;-</span> <span class='va'>ps_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/transform_sample_counts.html'>transform_sample_counts</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>.</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/ordinate.html'>ordinate</a></span><span class='op'>(</span>method <span class='op'>=</span> <span class='st'>"NMDS"</span>, distance <span class='op'>=</span> <span class='st'>"bray"</span>, trymax <span class='op'>=</span> <span class='fl'>50</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>Run 0 stress 0.1002992 
+Run 1 stress 0.1173969 
+Run 2 stress 0.1480709 
+Run 3 stress 0.1173968 
+Run 4 stress 0.1002992 
+... Procrustes: rmse 3.717243e-06  max resid 1.691263e-05 
+... Similar to previous best
+Run 5 stress 0.1424676 
+Run 6 stress 0.130377 
+Run 7 stress 0.1002992 
+... Procrustes: rmse 2.661887e-06  max resid 1.175533e-05 
+... Similar to previous best
+Run 8 stress 0.1002992 
+... Procrustes: rmse 1.104143e-05  max resid 6.17019e-05 
+... Similar to previous best
+Run 9 stress 0.1173976 
+Run 10 stress 0.1173975 
+Run 11 stress 0.1292318 
+Run 12 stress 0.1294527 
+Run 13 stress 0.1002992 
+... New best solution
+... Procrustes: rmse 5.355197e-06  max resid 1.53618e-05 
+... Similar to previous best
+Run 14 stress 0.1629023 
+Run 15 stress 0.117396 
+Run 16 stress 0.1417549 
+Run 17 stress 0.1417084 
+Run 18 stress 0.1002992 
+... Procrustes: rmse 1.162339e-05  max resid 7.001561e-05 
+... Similar to previous best
+Run 19 stress 0.1002992 
+... Procrustes: rmse 7.305224e-06  max resid 4.166893e-05 
+... Similar to previous best
+Run 20 stress 0.1292315 
+*** Best solution repeated 3 times</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>p_ord</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/plot_ordination.html'>plot_ordination</a></span><span class='op'>(</span><span class='va'>ps_plot</span>, <span class='va'>nmds</span>, </span>
+<span>  color <span class='op'>=</span> <span class='st'>"collection_location"</span>, type <span class='op'>=</span> <span class='st'>"samples"</span></span>
+<span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>color <span class='op'>=</span> <span class='st'>'Country'</span><span class='op'>)</span></span>
+<span><span class='va'>p_ord</span> </span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-30-1.svg" width="1950" /></p>
+</div>
+<h3 id="alpha-diversity-panel-b">Alpha diversity (Panel B)</h3>
+<p>We can compute Shannon alpha diversity index for each sample in a variety of ways:</p>
+<ul>
+<li><code>phyloseq::estimate_richness()</code></li>
+<li><code>vegan::diversity()</code></li>
+<li>Performing the calculation ourselves from the definition
+<!--  --></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>shannon_index</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/phyloseq/man/otu_table-methods.html'>otu_table</a></span><span class='op'>(</span><span class='va'>ps_plot</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/orient_taxa.html'>orient_taxa</a></span><span class='op'>(</span>as <span class='op'>=</span> <span class='st'>'cols'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'>vegan</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/vegan/man/diversity.html'>diversity</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>shannon_index</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>head</span></span></code></pre>
+</div>
+<pre><code>ERR3026500:288937 ERR3026576:289013 ERR3026559:288996 
+        1.3500820         0.6443310         1.3777211 
+ERR3026571:289008 ERR3026512:288949 ERR3026526:288963 
+        0.9189514         2.0592347         1.6738584 </code></pre>
+</div>
+<p>Note that we needed to reorient the abundance matrix (i.e. OTU table) to have taxa corresponding to columns, as this is what functions in the vegan package expect.
+We can tell that we used the correct orientation because the resulting diversity values are in a named vector where the names correspond to the sample names.
+If we had passed the matrix in the incorrect orientation, then the vector names would be the taxa names.</p>
+<p>Let’s add the Shannon index to a copy of the sample data,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sam_plot</span> <span class='op'>&lt;-</span> <span class='va'>ps_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sample_data</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as_tibble</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://tibble.tidyverse.org/reference/add_column.html'>add_column</a></span><span class='op'>(</span>shannon_index <span class='op'>=</span> <span class='va'>shannon_index</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>then create the plot,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>p_div</span> <span class='op'>&lt;-</span> <span class='va'>sam_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>shannon_index</span>, x <span class='op'>=</span> <span class='va'>collection_location</span>, </span>
+<span>      color <span class='op'>=</span> <span class='va'>collection_location</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_boxplot.html'>geom_boxplot</a></span><span class='op'>(</span>outlier.shape <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/pkg/ggbeeswarm/man/geom_quasirandom.html'>geom_quasirandom</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/expand_limits.html'>expand_limits</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='co'># scale_color_manual(values = colors_countries) +</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>'Country'</span>, y <span class='op'>=</span> <span class='st'>'Shannon index'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span></span>
+<span>    axis.text.x <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>element_text</a></span><span class='op'>(</span>angle <span class='op'>=</span> <span class='fl'>45</span>, vjust <span class='op'>=</span> <span class='fl'>1</span>, hjust <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,</span>
+<span>    legend.position <span class='op'>=</span> <span class='st'>'none'</span></span>
+<span>  <span class='op'>)</span></span>
+<span><span class='va'>p_div</span></span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-33-1.svg" width="1950" /></p>
+</div>
+<p>Note, I’m plotting the data points over the box plots, since it is useful to see the scatter when we’re working with a relatively small number of points like this.
+I therefore turned off the plotting of outliers in the boxplot layer.</p>
+<p>Note, I suggest using the exponential of the Shannon index and plotting on a log scale), so that the numbers shown on the axis are in terms of effective number of species.</p>
+<h3 id="relative-abundances-proportions-panel-c">Relative abundances (Proportions) (Panel C)</h3>
+<p>In the actual Rothman figure, the abundances for a set of viruses are shown; the particular viruses were picked based on an analysis to determine viruses that vary across treatment plant, using the ANCOM R package.
+I may do that in a future version of this script, but for now I’ll just pick the 10 most abundant viruses by average proportion.</p>
+<p>First, get a data frame for plotting, with the proportions of all taxa alongside the original read counts,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='va'>ps_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>as_tibble</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/with_groups.html'>with_groups</a></span><span class='op'>(</span><span class='va'>.sample</span>, <span class='va'>mutate</span>,</span>
+<span>    proportion <span class='op'>=</span> <span class='va'>.abundance</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.abundance</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>Next, get the top 10 viruses by median proportion. We can do this various ways, e.g.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>top_viruses1</span> <span class='op'>&lt;-</span> <span class='va'>ps_plot</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/transform_sample_counts.html'>transform_sample_counts</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>.</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://mikemc.github.io/speedyseq/reference/orient_taxa.html'>orient_taxa</a></span><span class='op'>(</span>as <span class='op'>=</span> <span class='st'>'rows'</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>otu_table</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='va'>median</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span>decreasing <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>names</span></span></code></pre>
+</div>
+</div>
+<p>or</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>top_viruses2</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/with_groups.html'>with_groups</a></span><span class='op'>(</span><span class='va'>.otu</span>, <span class='va'>summarize</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='va'>proportion</span>, <span class='va'>median</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/slice.html'>slice_max</a></span><span class='op'>(</span><span class='va'>proportion</span>, n <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='va'>print</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/pull.html'>pull</a></span><span class='op'>(</span><span class='va'>.otu</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 10 × 2
+   .otu                                                        propo…¹
+   &lt;chr&gt;                                                         &lt;dbl&gt;
+ 1 Viruses;Orthornavirae;Kitrinoviricota;Alsuviricetes;Martel… 0.282  
+ 2 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Myovirida… 0.0821 
+ 3 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Siphoviri… 0.0456 
+ 4 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Siphoviri… 0.0127 
+ 5 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Herellevi… 0.00844
+ 6 Viruses;Orthornavirae;Pisuviricota;Duplopiviricetes;Durnav… 0.00821
+ 7 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Myovirida… 0.00500
+ 8 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Podovirid… 0.00478
+ 9 Viruses;;Uroviricota;Caudoviricetes;Caudovirales;Myovirida… 0.00353
+10 Viruses;Orthornavirae;Pisuviricota;Pisoniviricetes;Picorna… 0.00323
+# … with abbreviated variable name ¹​proportion</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>top_viruses1</span>, <span class='va'>top_viruses2</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>p_prop</span> <span class='op'>&lt;-</span> <span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>.otu</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='va'>top_viruses1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='va'>genus</span>, <span class='va'>fct_reorder</span>, <span class='va'>proportion</span>, .fun <span class='op'>=</span> <span class='va'>median</span>, .desc <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,</span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>collection_location</span>, y <span class='op'>=</span> <span class='va'>proportion</span>,</span>
+<span>      color <span class='op'>=</span> <span class='va'>collection_location</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>genus</span>, nrow <span class='op'>=</span> <span class='fl'>2</span>, scales <span class='op'>=</span> <span class='st'>'free_y'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='co'># scale_y_log10() +</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_boxplot.html'>geom_boxplot</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_jitter.html'>geom_jitter</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='st'>'Proportion'</span>, x <span class='op'>=</span> <span class='st'>'Country'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span></span>
+<span>    axis.text.x <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>element_text</a></span><span class='op'>(</span>angle <span class='op'>=</span> <span class='fl'>45</span>, vjust <span class='op'>=</span> <span class='fl'>1</span>, hjust <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,</span>
+<span>    legend.position <span class='op'>=</span> <span class='st'>'none'</span></span>
+<span>  <span class='op'>)</span></span>
+<span><span class='va'>p_prop</span></span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-37-1.svg" width="3000" /></p>
+</div>
+<p>Note, I’ve ordered the facets as decreasing in median proportion.</p>
+<h3 id="put-the-panels-together">Put the panels together</h3>
+<p>Putting multiple panels together is often very easy with the patchwork package loaded,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='op'>(</span><span class='va'>p_ord</span> <span class='op'>+</span> <span class='va'>p_div</span><span class='op'>)</span> <span class='op'>/</span> <span class='va'>p_prop</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://patchwork.data-imaginist.com/reference/plot_annotation.html'>plot_annotation</a></span><span class='op'>(</span>tag_levels <span class='op'>=</span> <span class='st'>'A'</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="czid-r-analysis-demo_files/figure-html5/unnamed-chunk-38-1.svg" width="3000" /></p>
+</div>
+<p>This plot could definitely benefit from some extra fiddling, to adjust the spacing and colors etc.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-hjelmso2019meta" class="csl-entry" role="doc-biblioentry">
+Hjelmsø, Mathis Hjort, Sarah Mollerup, Randi Holm Jensen, Carlotta Pietroni, Oksana Lukjancenko, Anna Charlotte Schultz, Frank M. Aarestrup, and Anders Johannes Hansen. 2019. <span>“Metagenomic Analysis of Viruses in Toilet Waste from Long Distance Flights New Procedure for Global Infectious Disease Surveillance.”</span> <em>PLOS ONE</em> 14 (1): e0210368. <a href="https://doi.org/10.1371/journal.pone.0210368">https://doi.org/10.1371/journal.pone.0210368</a>.
+</div>
+<div id="ref-mcdonald2012theb" class="csl-entry" role="doc-biblioentry">
+McDonald, Daniel, Jose C Clemente, Justin Kuczynski, Jai Ram Rideout, Jesse Stombaugh, Doug Wendel, Andreas Wilke, et al. 2012. <span>“The <span>Biological Observation Matrix</span> (<span>BIOM</span>) Format or: How <span>I</span> Learned to Stop Worrying and Love the Ome-Ome.”</span> <em>GigaScience</em> 1 (1): 2047-217X-1-7. <a href="https://doi.org/10.1186/2047-217X-1-7">https://doi.org/10.1186/2047-217X-1-7</a>.
+</div>
+<div id="ref-rothman2021rnav" class="csl-entry" role="doc-biblioentry">
+Rothman, Jason A., Theresa B. Loveless, Joseph Kapcia, Eric D. Adams, Joshua A. Steele, Amity G. Zimmer-Faust, Kylie Langlois, et al. 2021. <span>“<span>RNA Viromics</span> of <span>Southern California Wastewater</span> and <span>Detection</span> of <span>SARS-CoV-2 Single-Nucleotide Variants</span>.”</span> <em>Applied and Environmental Microbiology</em> 87 (23): e01448–21. <a href="https://doi.org/10.1128/AEM.01448-21">https://doi.org/10.1128/AEM.01448-21</a>.
+</div>
+</div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="references">References</h3>
+  <div id="references-listing"></div>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>

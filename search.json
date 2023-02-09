@@ -1,0 +1,19 @@
+{
+  "articles": [
+    {
+      "path": "about.html",
+      "title": "Mike's NAO notebook",
+      "author": [],
+      "contents": "\nThis site is collection of notes and analyses related to my work at the Nucleic Acid Observatory project.\nAt present, most of the posts are preliminary and/or unfinished analyses which are lacking much in the way of explanation.\n\n\n\n",
+      "last_modified": "2023-02-09T16:39:14-05:00"
+    },
+    {
+      "path": "index.html",
+      "title": "Mike's NAO notebook",
+      "author": [],
+      "contents": "\n\n\n\n",
+      "last_modified": "2023-02-09T16:39:15-05:00"
+    }
+  ],
+  "collections": ["posts/posts.json"]
+}
