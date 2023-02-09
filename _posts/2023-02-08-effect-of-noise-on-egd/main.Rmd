@@ -1,0 +1,358 @@
+---
+title: "Examining the effect of noise on Exponential Growth Detection"
+description: |
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - EGD
+  - R
+  - theory
+bibliography: ../../_references.bib
+date: 2023-02-08
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300
+)
+```
+
+```{r}
+# set of data analysis and viz tools
+library(tidyverse)
+library(furrr)
+plan(multisession, workers = 3)
+# file system helpers
+library(fs)
+# specifying locations within a project
+library(here)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+library(ggdist)
+theme_set(theme_cowplot())
+
+# stats
+library(rstanarm)
+options(mc.cores = parallel::detectCores())
+library(broom.mixed)
+```
+
+# Background
+
+We've done some examination of the ability to detect exponential increase when there is no noise beyond the Poisson error process associated with sequencing. 
+But we know there is additional noise due to processes such as shedding, sample collection, and sample processing.
+
+Questions this analysis considers:
+
+- How does increasing the amount of noise in the relative abundance of pathogen in the sequencing data reduce our power to estimate its growth rate or infer that it is exponentially increasing?
+- How much additional sequencing effort is required to make up for a given increase in noise/dispersion? this is a naive question --- we know from statistical principles that you can't really make up for more noise upstream of sequencing by doing more sequencing; you need to make new measurements that have independent noise. But I consider it here for illustration purposes.
+
+# Analysis
+
+Assume a Gamma-Poisson (also known as Negative Binomial) model for both the real data and the statistical inference model.
+
+I will start with a simple model.
+
+For now, I will assume that the fraction of the population that is infected grows exponentially without any noise.
+\begin{align}
+  i(t) = i(0) \exp(r t),
+\end{align}
+and that number of reads of the pathogen in the sample from time $t$, $M(t)$, has expectation
+\begin{align}
+  E[M(t)] &= i(t) \cdot s B \mathcal M 
+        \\&\equiv i(s) \cdot a,
+\end{align}
+where 
+
+- $s$ is the rate of pathogen shedding in infected, relative to background microbiome
+- $B$ is the measurement efficiency (bias), relative to background microbiome
+- $\mathcal M$ is the total number of sequencing reads
+
+This formula for the mean read count of the pathogen is derived elsewhere.
+For simplicity I'm treating all of $s$, $B$, and $\mathcal M$ as fixed parameters. 
+Since all of these parameters are constants that multiply together, it is convenient for later calculations to define $a \equiv sB\mathcal M$.
+
+TODO
+
+- [ ] Explain nuance regarding noise etc
+- [ ] Consider using more nuanced model for expected pathogen reads based on integral of $i(t)$.
+
+I assume a Negative Binomial model for the number of reads of the pathogen in the sample from time $t$, using the 'alternative parameterization' used described in the [Stan docs](https://mc-stan.org/docs/2_20/functions-reference/nbalt.html); however, I'll follow Rstanarm and use $\theta$ in place of $\phi$ for the reciprocal dispersion parameter.
+
+If $E[M] = \mu$, then the variance of $M$ is
+\begin{align}
+  \text{Var}[M] 
+    &= \mu + \frac{\mu^2}{\theta}
+  \\&= \mu \left(1 + \frac{\mu}{\theta} \right),
+\end{align}
+and the coefficient of variation is
+\begin{align}
+  \text{CV}[M] 
+    &= \frac{\sqrt{\text{Var}[M]}}{E[M]}
+  \\&= \sqrt{\frac{1}{\mu} + \frac{1}{\theta}}.
+\end{align}
+
+(speculative) Intuitively, the coefficient of variation is the measure of noise relevant for our power to infer exponential growth rate.
+The CV is Poisson-like when $\mu \ll \theta$ and Gamma-like when $\mu \gg \theta$.
+In the Poisson regime, we can reduce the CV by increasing sequencing effort and hence increasing $\mu$;
+however, once $\mu \gg \theta$, increasing the sequencing effort will have a negligible benefit.
+Instead, we need to collect additional samples and/or re-measure existing samples so as to effectively average out the extra-Poisson noise.
+
+I will simulate using `stats::rnbinom` with the parameterization matching 
+The `size` argument in `rnbinom` is the (reciprocal) dispersion parameter $\phi$ in [stan docs](https://mc-stan.org/docs/2_20/functions-reference/nbalt.html), but which is called $\theta$ in `rstanarm::neg_binomial_2`.
+
+```{r}
+# Total time of monitoring, in days
+total_time <- 20
+sampling_days <- seq(0, total_time - 1, by = 1)
+# Initial fraction of population infected
+i_0 <- 1e-4
+# Growth rate of infections to correspond to 4 doublings
+doubling_time <- 5
+r <- log(2) / doubling_time
+# Multiplier a s.t. expected number of reads spans 1 over the range
+a <- 0.4 / i_0
+# a * i_0 * exp(r * sampling_days)
+
+# reciprocal-dispersion parameter; smaller values = lower variance
+theta_sim <- 5e-1
+
+set.seed(42)
+sim <- tibble(t = sampling_days) %>%
+  mutate(
+    i_t = i_0 * exp(r * t),
+    M_t_expected = a * i_t,
+    # lambda_t = rgamma(n(), shape = 1, rate = 1 / M_t_expected),
+    # M_t = rpois(n(), lambda_t)
+    M_t = rnbinom(n(), size = theta_sim, mu = M_t_expected)
+  )
+```
+
+```{r}
+sim %>%
+  ggplot(aes(t)) +
+    geom_line(aes(y = M_t_expected)) +
+    geom_point(aes(y = M_t))
+```
+
+
+Now we want to repeat the simulations many times for a range of values of $\theta$ and $a$.
+
+
+```{r}
+simulate_monitoring <- function(theta, a) {
+  tibble(t = sampling_days) %>%
+    mutate(
+      i_t = i_0 * exp(r * t),
+      M_t_expected = a * i_t,
+      M_t = rnbinom(n(), size = theta, mu = M_t_expected)
+    )
+}
+
+set.seed(42)
+
+sims <- crossing(
+  theta = c(3e-2, 1e-1, 3e-1, 1e0),
+  # a = 4000 * c(1, 3, 10, 30),
+  a = 4000 * c(1, 10, 100),
+  rep = 1:40
+) %>%
+  mutate(
+    data = map2(theta, a, simulate_monitoring),
+    M_total = map_dbl(data, ~ sum(.x$M_t))
+  )
+```
+
+```{r}
+sims %>%
+  unnest(data) %>%
+  ggplot(aes(t, M_t)) +
+  facet_grid(a ~ theta, scales = 'free_y') +
+  geom_line(aes(group = rep))
+```
+
+CHECK: Do any simulations have no observations?
+
+```{r}
+sims %>%
+  count(theta, M_total == 0)
+```
+
+Yes! We need to handle these separately, since they will cause errors when we try to fit the GLM.
+
+```{r}
+```
+
+Let's try fitting on a subset, for now using the 'optimizing' algorithm to speed things up.
+We must restrict ourselves to cases where the total count is at least 1, to be able to fit.
+We might consider restricting ourselves to a higher count than this.
+
+TODO: disable centering the predictors; otherwise, need to change our intercept prior to be based on the midpoint of the simulation.
+
+```{r}
+sims_fit <- sims %>%
+  # filter(rep <= 2, M_total > 0) %>%
+  filter(M_total > 0) %>%
+  mutate(
+    prior_intercept_mean = log(a * i_0),
+    # Note: For testing with 'optimizing', we can fit in parallel
+    fit = map(data, ~stan_glm(
+        M_t ~ t,, 
+        data = .x,
+        family = neg_binomial_2,
+        prior = normal(0, 0.5, autoscale = FALSE),
+        # prior_intercept = normal(prior_intercept_mean, 2.5, autoscale = FALSE),
+        prior_aux = exponential(2, autoscale = FALSE),
+        algorithm = 'optimizing',
+    ))
+  )
+```
+
+TODO
+
+- Look at a single model and its fit against the 'real' data.
+- Consider the prior on theta, and explicitly code it in. For the purposes of this study, I can make the prior accurately reflect the actual range of theta values that I'm using. In fact, it would even make sense to set the prior tightly around the correct value of theta, which should also speed up the inference.
+- reconsider the prior on the intercept; could set to a range like with theta though that doesn't make too much sense if we think of the fact that we're modeling an increase in sequencing effort and so we have extra info that the mean should increase accordingly
+
+```{r}
+fit <- sims_fit %>% pull(fit) %>% pluck(1)
+fit
+fit %>% tidy(conf.int = TRUE)
+fit %>% prior_summary
+```
+
+Our goal is to assess how dispersion impacts our ability to infer the exponential trend.
+One way we can do that is plot credible intervals for the growth rate $r$, for all simulations, group by theta, against the actual growth rate.
+An easy way to get CIs is with `broom.mixed::tidy()`,
+
+```{r}
+fit %>% tidy(conf.int = TRUE, conf.level = 0.9)
+```
+
+Besides correctly inferring the growth rate, we are also interested in the our posterior that the sequence is increasing (possibly above a certain rate of increase; here I'll just consider a rate above 0).
+We can do this for a single fit like
+
+```{r}
+# post <- fit %>% as.matrix %>% as_tibble %>% janitor::clean_names() %>%
+  # glimpse
+fit %>% as.matrix %>% {mean(.[, 't'] > 0)}
+```
+
+```{r}
+x <- sims_fit %>%
+  mutate(
+    prob_increasing = map_dbl(fit, ~ .x %>% as.matrix %>% {mean(.[, 't'] > 0)}),
+    fit = map(fit, tidy, conf.int = TRUE, conf.level = 0.9),
+  ) %>%
+  unnest(fit) %>%
+  filter(term == 't')
+```
+
+```{r, fig.dim = c(8,10)}
+x %>%
+  ggplot(aes(y = rep, x = estimate)) +
+  facet_grid(a ~ theta) +
+  geom_pointinterval(
+    aes(xmin = conf.low, xmax = conf.high),
+    fatten_point = 1
+  ) +
+  geom_vline(xintercept = 0, color = 'grey') +
+  geom_vline(xintercept = r, linetype = 2, color = 'darkred')
+```
+
+Note that for lambda=0.03, some intervals are missing; these are cases where the dispersion was so high that we never saw the pathogen.
+In those cases, our estimate of the growth rate is simply the prior; perhaps we can show that?
+
+From this graph, it looks like a 10X increase in dispersion requires more than a 10X increase in sequencing effort to achieve the same power.
+
+Let's check how calibrated these CIs are, by comparing the proportion of fits that contain the true value of $r$ against the expected 90%.
+Note, the case where $\theta = 0.03$ is currently not adjusted for the missing data.
+
+```{r}
+x %>%
+  mutate(
+    true_value_in_ci = r >= conf.low & r <= conf.high
+  ) %>%
+  summarize(.by = c(theta, a),
+    proportion = mean(true_value_in_ci)
+  )
+```
+
+These seem to be fairly calibrated; would need to do a binomial test to look for evidence of deviation.
+
+Now let's look at the power to detect exponential growth, by considering the posterior probability that $r>0$.
+
+```{r}
+x %>%
+  ggplot(aes(y = as.factor(theta), x = prob_increasing)) +
+  facet_wrap(~a, labeller = label_both) +
+  labs(x = 'Pr(r > 0)', y = 'reciprocal dispersion, theta') +
+  geom_dots(binwidth = 0.01)
+  # stat_dotsinterval()
+```
+
+TODO: in revising, do the above calculation at the same time as the inteval extraction. Could also do the interval in the same manner, from the posterior.
+
+```{r}
+x %>%
+  ggplot(aes(y = as.factor(a), x = prob_increasing)) +
+  facet_wrap(~theta, labeller = label_both) +
+  labs(x = 'Pr(r > 0)', y = 'reciprocal dispersion, theta') +
+  geom_dots(binwidth = 0.01)
+  # stat_dotsinterval()
+```
+
+How often do we infer that $r>0$ is more likely than not? Or with 80% certainty?
+
+Note: We have not filled in the missing rows where there were no observations; in these cases, we cannot infer increase.
+
+```{r}
+x %>%
+  summarize(.by = c(theta, a),
+    prob_0.5 = mean(prob_increasing > 0.5),
+    prob_0.6 = mean(prob_increasing > 0.6),
+    prob_0.8 = mean(prob_increasing > 0.8),
+  )
+```
+
+
+# Next steps
+
+- write out the model, and compute the coefficient of variation under it.
+- write some background
+- make the model more concrete, perhaps by framing as having a random relative abundance and Poisson sampling.
+- start with a lower value of a, s.t. can see that sequencing depth matters until we're seeing a large enough expected count
+- investigate the errors during fitting
+
+# Discussion
+
+Increasing the sequencing depth cannot make up for an increase in overdispersion.
+This makes sense --- once we're in a regime where the expected read count is above 0 and there is lots of overdispersion relative to Poisson, sequencing more doesn't help much; it just helps us get a more precise measurement of the latent noisy (relative) abundance, and what we need is to reduce noise in that latent abundance.
+To do this, we need to measure more samples with independent relative abundances.
+We can reduce the noise from sample processing by processing the same sample repeatedly; however, for other noise sources we'd need to collect new samples from different sources or from more days.
+
+Note that because I use the correct model to fit the data, increasing the dispersion does not make the fit overconfident; the credible intervals are still tending to cover the true value of r the expected 90% of the time.
+In contrast, if I fit using Poisson regression instead, I expect the fit to be overconfident, that is that the credible intervals will be too small and we'll be missing the true r more than 90% of the time, for the cases there theta is significantly less than 1.
+
+# Session info {.appendix}
+
+<details><summary>Click for session info</summary>
+```{r, R.options = list(width = 83)}
+sessioninfo::session_info()
+```
+</details>
