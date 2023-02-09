@@ -1,9 +1,10 @@
 ---
-title: "About this blog"
-description: |
-  Some additional details about the blog
+title: "Mike's NAO notebook"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+This site is collection of notes and analyses related to my work at the [Nucleic Acid Observatory project](https://naobservatory.org).
+At present, most of the posts are preliminary and/or unfinished analyses which are lacking much in the way of explanation.
