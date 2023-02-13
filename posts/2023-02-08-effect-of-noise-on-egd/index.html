@@ -1,0 +1,2756 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { color: #00769e; background-color: #f1f3f5; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #00769e; } /* Normal */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #657422; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #00769e; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #00769e; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #00769e; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
+
+  <!--radix_placeholder_meta_tags-->
+<title>Mike's NAO notebook: Examining the effect of noise on Exponential Growth Detection</title>
+
+
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2023-02-08"/>
+<meta property="article:created" itemprop="dateCreated" content="2023-02-08"/>
+<meta name="article:author" content="Michael R. McLaren"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="Mike&#39;s NAO notebook: Examining the effect of noise on Exponential Growth Detection"/>
+<meta property="og:type" content="article"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="Mike&#39;s NAO notebook"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="Mike&#39;s NAO notebook: Examining the effect of noise on Exponential Growth Detection"/>
+
+<!--/radix_placeholder_meta_tags-->
+  
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","categories","bibliography","date","draft","output"]}},"value":[{"type":"character","attributes":{},"value":["Examining the effect of noise on Exponential Growth Detection"]},{"type":"NULL"},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Michael R. McLaren"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":[]}},"value":[]}]}]},{"type":"character","attributes":{},"value":["EGD","R","theory"]},{"type":"character","attributes":{},"value":["../../_references.bib"]},{"type":"character","attributes":{},"value":["2023-02-08"]},{"type":"logical","attributes":{},"value":[false]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","dev","toc"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["svg"]},{"type":"logical","attributes":{},"value":[true]}]}]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["main_files/anchor-4.2.2/anchor.min.js","main_files/bowser-1.9.3/bowser.min.js","main_files/distill-2.2.21/template.v2.js","main_files/figure-html5/unnamed-chunk-13-1.svg","main_files/figure-html5/unnamed-chunk-15-1.svg","main_files/figure-html5/unnamed-chunk-16-1.svg","main_files/figure-html5/unnamed-chunk-3-1.svg","main_files/figure-html5/unnamed-chunk-5-1.svg","main_files/header-attrs-2.18/header-attrs.js","main_files/jquery-3.6.0/jquery-3.6.0.js","main_files/jquery-3.6.0/jquery-3.6.0.min.js","main_files/jquery-3.6.0/jquery-3.6.0.min.map","main_files/popper-2.6.0/popper.min.js","main_files/tippy-6.2.7/tippy-bundle.umd.min.js","main_files/tippy-6.2.7/tippy-light-border.css","main_files/tippy-6.2.7/tippy.css","main_files/tippy-6.2.7/tippy.umd.min.js","main_files/webcomponents-2.0.0/webcomponents.js"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      tolerance: 5,
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #0F2E3D;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+  min-width: 150px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
+</style>
+
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description || ''}
+                </div>
+                <div class="search-item-preview">
+                  ${img}
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
+  font-size: 100%;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-top: 2.5rem;
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: auto;
+}
+
+d-article div.sourceCode {
+  background-color: white;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+d-article pre {
+  font-size: 12px;
+  color: black;
+  background: none;
+  margin-top: 0;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
+@media(min-width: 768px) {
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+d-article pre {
+  font-size: 14px;
+}
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
+}
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      const citeChild = $(this).children()[0]
+      // Do not process if @xyz has been used without escaping and without bibliography activated
+      // https://github.com/rstudio/distill/issues/466
+      if (citeChild === undefined) return true
+
+      if (citeChild.nodeName == "D-FOOTNOTE") {
+        var fn = citeChild
+        $(this).html(fn.shadowRoot.querySelector("sup"))
+        $(this).id = fn.id
+        fn.remove()
+      }
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        // Could use CSS.escape too here, we insure backward compatibility in navigator
+        return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+      }).join("\n");
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
+
+    // fix footnotes in tables (#411)
+    // replacing broken distill.pub feature
+    $('table d-footnote').each(function() {
+      // we replace internal showAtNode methode which is triggered when hovering a footnote
+      this.hoverBox.showAtNode = function(node) {
+        // ported from https://github.com/distillpub/template/pull/105/files
+        calcOffset = function(elem) {
+            let x = elem.offsetLeft;
+            let y = elem.offsetTop;
+            // Traverse upwards until an `absolute` element is found or `elem`
+            // becomes null.
+            while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                x += elem.offsetLeft;
+                y += elem.offsetTop;
+            }
+
+            return { left: x, top: y };
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+        const bbox = node.getBoundingClientRect();
+        const offset = calcOffset(node);
+        this.show([offset.left + bbox.width, offset.top + bbox.height]);
+      }
+    })
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-contents').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    // ignore leaflet img layers (#106)
+    figures = figures.filter(':not(img[class*="leaflet"])')
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.18/header-attrs.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"Examining the effect of noise on Exponential Growth Detection","authors":[{"author":"Michael R. McLaren","authorURL":{},"affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2023-02-08T00:00:00.000+00:00","citationText":"McLaren, 2023"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a href="../../index.html" class="title">Mike's NAO notebook</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
+</div>
+<div class="nav-right">
+<a href="../../index.html">Home</a>
+<a href="../../about.html">About</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>Examining the effect of noise on Exponential Growth Detection</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:EGD" class="dt-tag">EGD</a>
+  <a href="../../index.html#category:R" class="dt-tag">R</a>
+  <a href="../../index.html#category:theory" class="dt-tag">theory</a>
+</div>
+<!--/radix_placeholder_categories-->
+
+</div>
+
+<div class="d-byline">
+  Michael R. McLaren true 
+  
+<br/>2023-02-08
+</div>
+
+<div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#background" id="toc-background">Background</a></li>
+<li><a href="#analysis" id="toc-analysis">Analysis</a></li>
+<li><a href="#next-steps" id="toc-next-steps">Next steps</a></li>
+<li><a href="#discussion" id="toc-discussion">Discussion</a></li>
+<li><a href="#session-info" id="toc-session-info">Session info</a></li>
+</ul>
+</nav>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># set of data analysis and viz tools</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/DavisVaughan/furrr'>furrr</a></span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>multisession</span>, workers <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span>
+<span><span class='co'># file system helpers</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://fs.r-lib.org'>fs</a></span><span class='op'>)</span></span>
+<span><span class='co'># specifying locations within a project</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://here.r-lib.org/'>here</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># plotting helpers</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://wilkelab.org/cowplot/'>cowplot</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://patchwork.data-imaginist.com'>patchwork</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/eclarke/ggbeeswarm'>ggbeeswarm</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mjskay.github.io/ggdist/'>ggdist</a></span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme_get.html'>theme_set</a></span><span class='op'>(</span><span class='fu'><a href='https://wilkelab.org/cowplot/reference/theme_cowplot.html'>theme_cowplot</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># stats</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mc-stan.org/rstanarm/'>rstanarm</a></span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span><span class='op'>(</span>mc.cores <span class='op'>=</span> <span class='fu'>parallel</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/r/parallel/detectCores.html'>detectCores</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/bbolker/broom.mixed'>broom.mixed</a></span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<h1 id="background">Background</h1>
+<p>We’ve done some examination of the ability to detect exponential increase when there is no noise beyond the Poisson error process associated with sequencing.
+But we know there is additional noise due to processes such as shedding, sample collection, and sample processing.</p>
+<p>Questions this analysis considers:</p>
+<ul>
+<li>How does increasing the amount of noise in the relative abundance of pathogen in the sequencing data reduce our power to estimate its growth rate or infer that it is exponentially increasing?</li>
+<li>How much additional sequencing effort is required to make up for a given increase in noise/dispersion? this is a naive question — we know from statistical principles that you can’t really make up for more noise upstream of sequencing by doing more sequencing; you need to make new measurements that have independent noise. But I consider it here for illustration purposes.</li>
+</ul>
+<h1 id="analysis">Analysis</h1>
+<p>Assume a Gamma-Poisson (also known as Negative Binomial) model for both the real data and the statistical inference model.</p>
+<p>I will start with a simple model.</p>
+<p>For now, I will assume that the fraction of the population that is infected grows exponentially without any noise.
+<span class="math display">\[\begin{align}
+  i(t) = i(0) \exp(r t),
+\end{align}\]</span>
+and that number of reads of the pathogen in the sample from time <span class="math inline">\(t\)</span>, <span class="math inline">\(M(t)\)</span>, has expectation
+<span class="math display">\[\begin{align}
+  E[M(t)] &amp;= i(t) \cdot s B \mathcal M
+        \\&amp;\equiv i(s) \cdot a,
+\end{align}\]</span>
+where</p>
+<ul>
+<li><span class="math inline">\(s\)</span> is the rate of pathogen shedding in infected, relative to background microbiome</li>
+<li><span class="math inline">\(B\)</span> is the measurement efficiency (bias), relative to background microbiome</li>
+<li><span class="math inline">\(\mathcal M\)</span> is the total number of sequencing reads</li>
+</ul>
+<p>This formula for the mean read count of the pathogen is derived elsewhere.
+For simplicity I’m treating all of <span class="math inline">\(s\)</span>, <span class="math inline">\(B\)</span>, and <span class="math inline">\(\mathcal M\)</span> as fixed parameters.
+Since all of these parameters are constants that multiply together, it is convenient for later calculations to define <span class="math inline">\(a \equiv sB\mathcal M\)</span>.</p>
+<p>TODO</p>
+<ul class="task-list">
+<li><input type="checkbox" disabled="" />Explain nuance regarding noise etc</li>
+<li><input type="checkbox" disabled="" />Consider using more nuanced model for expected pathogen reads based on integral of <span class="math inline">\(i(t)\)</span>.</li>
+</ul>
+<p>I assume a Negative Binomial model for the number of reads of the pathogen in the sample from time <span class="math inline">\(t\)</span>, using the ‘alternative parameterization’ used described in the <a href="https://mc-stan.org/docs/2_20/functions-reference/nbalt.html">Stan docs</a>; however, I’ll follow Rstanarm and use <span class="math inline">\(\theta\)</span> in place of <span class="math inline">\(\phi\)</span> for the reciprocal dispersion parameter.</p>
+<p>If <span class="math inline">\(E[M] = \mu\)</span>, then the variance of <span class="math inline">\(M\)</span> is
+<span class="math display">\[\begin{align}
+  \text{Var}[M]
+    &amp;= \mu + \frac{\mu^2}{\theta}
+  \\&amp;= \mu \left(1 + \frac{\mu}{\theta} \right),
+\end{align}\]</span>
+and the coefficient of variation is
+<span class="math display">\[\begin{align}
+  \text{CV}[M]
+    &amp;= \frac{\sqrt{\text{Var}[M]}}{E[M]}
+  \\&amp;= \sqrt{\frac{1}{\mu} + \frac{1}{\theta}}.
+\end{align}\]</span></p>
+<p>(speculative) Intuitively, the coefficient of variation is the measure of noise relevant for our power to infer exponential growth rate.
+The CV is Poisson-like when <span class="math inline">\(\mu \ll \theta\)</span> and Gamma-like when <span class="math inline">\(\mu \gg \theta\)</span>.
+In the Poisson regime, we can reduce the CV by increasing sequencing effort and hence increasing <span class="math inline">\(\mu\)</span>;
+however, once <span class="math inline">\(\mu \gg \theta\)</span>, increasing the sequencing effort will have a negligible benefit.
+Instead, we need to collect additional samples and/or re-measure existing samples so as to effectively average out the extra-Poisson noise.</p>
+<p>I will simulate using <code>stats::rnbinom</code> with the parameterization matching
+The <code>size</code> argument in <code>rnbinom</code> is the (reciprocal) dispersion parameter <span class="math inline">\(\phi\)</span> in <a href="https://mc-stan.org/docs/2_20/functions-reference/nbalt.html">stan docs</a>, but which is called <span class="math inline">\(\theta\)</span> in <code>rstanarm::neg_binomial_2</code>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Total time of monitoring, in days</span></span>
+<span><span class='va'>total_time</span> <span class='op'>&lt;-</span> <span class='fl'>20</span></span>
+<span><span class='va'>sampling_days</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='va'>total_time</span> <span class='op'>-</span> <span class='fl'>1</span>, by <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span><span class='co'># Initial fraction of population infected</span></span>
+<span><span class='va'>i_0</span> <span class='op'>&lt;-</span> <span class='fl'>1e-4</span></span>
+<span><span class='co'># Growth rate of infections to correspond to 4 doublings</span></span>
+<span><span class='va'>doubling_time</span> <span class='op'>&lt;-</span> <span class='fl'>5</span></span>
+<span><span class='va'>r</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span> <span class='op'>/</span> <span class='va'>doubling_time</span></span>
+<span><span class='co'># Multiplier a s.t. expected number of reads spans 1 over the range</span></span>
+<span><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fl'>0.4</span> <span class='op'>/</span> <span class='va'>i_0</span></span>
+<span><span class='co'># a * i_0 * exp(r * sampling_days)</span></span>
+<span></span>
+<span><span class='co'># reciprocal-dispersion parameter; smaller values = lower variance</span></span>
+<span><span class='va'>theta_sim</span> <span class='op'>&lt;-</span> <span class='fl'>5e-1</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span></span>
+<span><span class='va'>sim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span><span class='op'>(</span>t <span class='op'>=</span> <span class='va'>sampling_days</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    i_t <span class='op'>=</span> <span class='va'>i_0</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>r</span> <span class='op'>*</span> <span class='va'>t</span><span class='op'>)</span>,</span>
+<span>    M_t_expected <span class='op'>=</span> <span class='va'>a</span> <span class='op'>*</span> <span class='va'>i_t</span>,</span>
+<span>    <span class='co'># lambda_t = rgamma(n(), shape = 1, rate = 1 / M_t_expected),</span></span>
+<span>    <span class='co'># M_t = rpois(n(), lambda_t)</span></span>
+<span>    M_t <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/NegBinomial.html'>rnbinom</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='va'>theta_sim</span>, mu <span class='op'>=</span> <span class='va'>M_t_expected</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sim</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>t</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>M_t_expected</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>M_t</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="main_files/figure-html5/unnamed-chunk-3-1.svg" width="1950" /></p>
+</div>
+<p>Now we want to repeat the simulations many times for a range of values of <span class="math inline">\(\theta\)</span> and <span class="math inline">\(a\)</span>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>simulate_monitoring</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>theta</span>, <span class='va'>a</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span>  <span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span><span class='op'>(</span>t <span class='op'>=</span> <span class='va'>sampling_days</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>      i_t <span class='op'>=</span> <span class='va'>i_0</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>r</span> <span class='op'>*</span> <span class='va'>t</span><span class='op'>)</span>,</span>
+<span>      M_t_expected <span class='op'>=</span> <span class='va'>a</span> <span class='op'>*</span> <span class='va'>i_t</span>,</span>
+<span>      M_t <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/NegBinomial.html'>rnbinom</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='va'>theta</span>, mu <span class='op'>=</span> <span class='va'>M_t_expected</span><span class='op'>)</span></span>
+<span>    <span class='op'>)</span></span>
+<span><span class='op'>}</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>sims</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://tidyr.tidyverse.org/reference/expand.html'>crossing</a></span><span class='op'>(</span></span>
+<span>  theta <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3e-2</span>, <span class='fl'>1e-1</span>, <span class='fl'>3e-1</span>, <span class='fl'>1e0</span><span class='op'>)</span>,</span>
+<span>  <span class='co'># a = 4000 * c(1, 3, 10, 30),</span></span>
+<span>  a <span class='op'>=</span> <span class='fl'>4000</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>10</span>, <span class='fl'>100</span><span class='op'>)</span>,</span>
+<span>  rep <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>40</span></span>
+<span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    data <span class='op'>=</span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map2.html'>map2</a></span><span class='op'>(</span><span class='va'>theta</span>, <span class='va'>a</span>, <span class='va'>simulate_monitoring</span><span class='op'>)</span>,</span>
+<span>    M_total <span class='op'>=</span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>.x</span><span class='op'>$</span><span class='va'>M_t</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sims</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/nest.html'>unnest</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>t</span>, <span class='va'>M_t</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_grid.html'>facet_grid</a></span><span class='op'>(</span><span class='va'>a</span> <span class='op'>~</span> <span class='va'>theta</span>, scales <span class='op'>=</span> <span class='st'>'free_y'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>group <span class='op'>=</span> <span class='va'>rep</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="main_files/figure-html5/unnamed-chunk-5-1.svg" width="1950" /></p>
+</div>
+<p>CHECK: Do any simulations have no observations?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sims</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='va'>theta</span>, <span class='va'>M_total</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 5 × 3
+  theta `M_total == 0`     n
+  &lt;dbl&gt; &lt;lgl&gt;          &lt;int&gt;
+1  0.03 FALSE            113
+2  0.03 TRUE               7
+3  0.1  FALSE            120
+4  0.3  FALSE            120
+5  1    FALSE            120</code></pre>
+</div>
+<p>Yes! We need to handle these separately, since they will cause errors when we try to fit the GLM.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='cn'>FALSE</span></span></code></pre>
+</div>
+<pre><code>[1] FALSE</code></pre>
+</div>
+<p>Let’s try fitting on a subset, for now using the ‘optimizing’ algorithm to speed things up.
+We must restrict ourselves to cases where the total count is at least 1, to be able to fit.
+We might consider restricting ourselves to a higher count than this.</p>
+<p>TODO: disable centering the predictors; otherwise, need to change our intercept prior to be based on the midpoint of the simulation.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>sims_fit</span> <span class='op'>&lt;-</span> <span class='va'>sims</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='co'># filter(rep &lt;= 2, M_total &gt; 0) %&gt;%</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>M_total</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    prior_intercept_mean <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>a</span> <span class='op'>*</span> <span class='va'>i_0</span><span class='op'>)</span>,</span>
+<span>    <span class='co'># Note: For testing with 'optimizing', we can fit in parallel</span></span>
+<span>    fit <span class='op'>=</span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span><span class='fu'><a href='https://mc-stan.org/rstanarm/reference/stan_glm.html'>stan_glm</a></span><span class='op'>(</span></span>
+<span>        <span class='va'>M_t</span> <span class='op'>~</span> <span class='va'>t</span>,, </span>
+<span>        data <span class='op'>=</span> <span class='va'>.x</span>,</span>
+<span>        family <span class='op'>=</span> <span class='va'>neg_binomial_2</span>,</span>
+<span>        prior <span class='op'>=</span> <span class='fu'><a href='https://mc-stan.org/rstanarm/reference/priors.html'>normal</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0.5</span>, autoscale <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>,</span>
+<span>        <span class='co'># prior_intercept = normal(prior_intercept_mean, 2.5, autoscale = FALSE),</span></span>
+<span>        prior_aux <span class='op'>=</span> <span class='fu'><a href='https://mc-stan.org/rstanarm/reference/priors.html'>exponential</a></span><span class='op'>(</span><span class='fl'>2</span>, autoscale <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>,</span>
+<span>        algorithm <span class='op'>=</span> <span class='st'>'optimizing'</span>,</span>
+<span>    <span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>TODO</p>
+<ul>
+<li>Look at a single model and its fit against the ‘real’ data.</li>
+<li>Consider the prior on theta, and explicitly code it in. For the purposes of this study, I can make the prior accurately reflect the actual range of theta values that I’m using. In fact, it would even make sense to set the prior tightly around the correct value of theta, which should also speed up the inference.</li>
+<li>reconsider the prior on the intercept; could set to a range like with theta though that doesn’t make too much sense if we think of the fact that we’re modeling an increase in sequencing effort and so we have extra info that the mean should increase accordingly</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>fit</span> <span class='op'>&lt;-</span> <span class='va'>sims_fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/pull.html'>pull</a></span><span class='op'>(</span><span class='va'>fit</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/pluck.html'>pluck</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span></span>
+<span><span class='va'>fit</span></span></code></pre>
+</div>
+<pre><code>stan_glm
+ family:       neg_binomial_2 [log]
+ formula:      M_t ~ t
+ observations: 20
+ predictors:   2
+------
+            Median MAD_SD
+(Intercept)  2.9    2.0  
+t           -0.4    0.3  
+
+Auxiliary parameter(s):
+                      Median MAD_SD
+reciprocal_dispersion 0.1    0.0   
+
+------
+* For help interpreting the printed output see ?print.stanreg
+* For info on the priors used see ?prior_summary.stanreg</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span>conf.int <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 2 × 5
+  term        estimate std.error conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 (Intercept)    2.86      1.96    -0.536    6.58  
+2 t             -0.429     0.272   -0.914    0.0584</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>prior_summary</span></span></code></pre>
+</div>
+<pre><code>Priors for model &#39;.&#39; 
+------
+Intercept (after predictors centered)
+ ~ normal(location = 0, scale = 2.5)
+
+Coefficients
+ ~ normal(location = 0, scale = 0.5)
+
+Auxiliary (reciprocal_dispersion)
+ ~ exponential(rate = 2)
+------
+See help(&#39;prior_summary.stanreg&#39;) for more details</code></pre>
+</div>
+<p>Our goal is to assess how dispersion impacts our ability to infer the exponential trend.
+One way we can do that is plot credible intervals for the growth rate <span class="math inline">\(r\)</span>, for all simulations, group by theta, against the actual growth rate.
+An easy way to get CIs is with <code>broom.mixed::tidy()</code>,</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span>conf.int <span class='op'>=</span> <span class='cn'>TRUE</span>, conf.level <span class='op'>=</span> <span class='fl'>0.9</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 2 × 5
+  term        estimate std.error conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 (Intercept)    2.86      1.96    -0.536    6.58  
+2 t             -0.429     0.272   -0.914    0.0584</code></pre>
+</div>
+<p>Besides correctly inferring the growth rate, we are also interested in the our posterior that the sequence is increasing (possibly above a certain rate of increase; here I’ll just consider a rate above 0).
+We can do this for a single fit like</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># post &lt;- fit %&gt;% as.matrix %&gt;% as_tibble %&gt;% janitor::clean_names() %&gt;%</span></span>
+<span>  <span class='co'># glimpse</span></span>
+<span><span class='va'>fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as.matrix</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>[</span>, <span class='st'>'t'</span><span class='op'>]</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span><span class='op'>}</span></span></code></pre>
+</div>
+<pre><code>[1] 0.075</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='va'>sims_fit</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    prob_increasing <span class='op'>=</span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span><span class='op'>(</span><span class='va'>fit</span>, <span class='op'>~</span> <span class='va'>.x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>as.matrix</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>[</span>, <span class='st'>'t'</span><span class='op'>]</span> <span class='op'>&gt;</span> <span class='fl'>0</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span>,</span>
+<span>    fit <span class='op'>=</span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='va'>fit</span>, <span class='va'>tidy</span>, conf.int <span class='op'>=</span> <span class='cn'>TRUE</span>, conf.level <span class='op'>=</span> <span class='fl'>0.9</span><span class='op'>)</span>,</span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/nest.html'>unnest</a></span><span class='op'>(</span><span class='va'>fit</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>term</span> <span class='op'>==</span> <span class='st'>'t'</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>rep</span>, x <span class='op'>=</span> <span class='va'>estimate</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_grid.html'>facet_grid</a></span><span class='op'>(</span><span class='va'>a</span> <span class='op'>~</span> <span class='va'>theta</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/geom_pointinterval.html'>geom_pointinterval</a></span><span class='op'>(</span></span>
+<span>    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>xmin <span class='op'>=</span> <span class='va'>conf.low</span>, xmax <span class='op'>=</span> <span class='va'>conf.high</span><span class='op'>)</span>,</span>
+<span>    fatten_point <span class='op'>=</span> <span class='fl'>1</span></span>
+<span>  <span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_abline.html'>geom_vline</a></span><span class='op'>(</span>xintercept <span class='op'>=</span> <span class='fl'>0</span>, color <span class='op'>=</span> <span class='st'>'grey'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_abline.html'>geom_vline</a></span><span class='op'>(</span>xintercept <span class='op'>=</span> <span class='va'>r</span>, linetype <span class='op'>=</span> <span class='fl'>2</span>, color <span class='op'>=</span> <span class='st'>'darkred'</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="main_files/figure-html5/unnamed-chunk-13-1.svg" width="2400" /></p>
+</div>
+<p>Note that for lambda=0.03, some intervals are missing; these are cases where the dispersion was so high that we never saw the pathogen.
+In those cases, our estimate of the growth rate is simply the prior; perhaps we can show that?</p>
+<p>From this graph, it looks like a 10X increase in dispersion requires more than a 10X increase in sequencing effort to achieve the same power.</p>
+<p>Let’s check how calibrated these CIs are, by comparing the proportion of fits that contain the true value of <span class="math inline">\(r\)</span> against the expected 90%.
+Note, the case where <span class="math inline">\(\theta = 0.03\)</span> is currently not adjusted for the missing data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    true_value_in_ci <span class='op'>=</span> <span class='va'>r</span> <span class='op'>&gt;=</span> <span class='va'>conf.low</span> <span class='op'>&amp;</span> <span class='va'>r</span> <span class='op'>&lt;=</span> <span class='va'>conf.high</span></span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>.by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>theta</span>, <span class='va'>a</span><span class='op'>)</span>,</span>
+<span>    proportion <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>true_value_in_ci</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 12 × 3
+   theta      a proportion
+   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+ 1  0.03   4000      0.853
+ 2  0.03  40000      0.744
+ 3  0.03 400000      0.8  
+ 4  0.1    4000      0.775
+ 5  0.1   40000      0.825
+ 6  0.1  400000      0.725
+ 7  0.3    4000      0.85 
+ 8  0.3   40000      0.85 
+ 9  0.3  400000      0.875
+10  1      4000      0.85 
+11  1     40000      0.925
+12  1    400000      0.95 </code></pre>
+</div>
+<p>These seem to be fairly calibrated; would need to do a binomial test to look for evidence of deviation.</p>
+<p>Now let’s look at the power to detect exponential growth, by considering the posterior probability that <span class="math inline">\(r&gt;0\)</span>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>theta</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='va'>prob_increasing</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>a</span>, labeller <span class='op'>=</span> <span class='va'>label_both</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>'Pr(r &gt; 0)'</span>, y <span class='op'>=</span> <span class='st'>'reciprocal dispersion, theta'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/geom_dotsinterval.html'>geom_dots</a></span><span class='op'>(</span>binwidth <span class='op'>=</span> <span class='fl'>0.01</span><span class='op'>)</span></span></code></pre>
+</div>
+<img src="main_files/figure-html5/unnamed-chunk-15-1.svg" width="1950" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span>  <span class='co'># stat_dotsinterval()</span></span></code></pre>
+</div>
+</div>
+<p>TODO: in revising, do the above calculation at the same time as the inteval extraction. Could also do the interval in the same manner, from the posterior.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='va'>prob_increasing</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>theta</span>, labeller <span class='op'>=</span> <span class='va'>label_both</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>'Pr(r &gt; 0)'</span>, y <span class='op'>=</span> <span class='st'>'reciprocal dispersion, theta'</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='http://mjskay.github.io/ggdist/reference/geom_dotsinterval.html'>geom_dots</a></span><span class='op'>(</span>binwidth <span class='op'>=</span> <span class='fl'>0.01</span><span class='op'>)</span></span></code></pre>
+</div>
+<img src="main_files/figure-html5/unnamed-chunk-16-1.svg" width="1950" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span>  <span class='co'># stat_dotsinterval()</span></span></code></pre>
+</div>
+</div>
+<p>How often do we infer that <span class="math inline">\(r&gt;0\)</span> is more likely than not? Or with 80% certainty?</p>
+<p>Note: We have not filled in the missing rows where there were no observations; in these cases, we cannot infer increase.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>x</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>.by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>theta</span>, <span class='va'>a</span><span class='op'>)</span>,</span>
+<span>    prob_0.5 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>prob_increasing</span> <span class='op'>&gt;</span> <span class='fl'>0.5</span><span class='op'>)</span>,</span>
+<span>    prob_0.6 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>prob_increasing</span> <span class='op'>&gt;</span> <span class='fl'>0.6</span><span class='op'>)</span>,</span>
+<span>    prob_0.8 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>prob_increasing</span> <span class='op'>&gt;</span> <span class='fl'>0.8</span><span class='op'>)</span>,</span>
+<span>  <span class='op'>)</span></span></code></pre>
+</div>
+<pre><code># A tibble: 12 × 5
+   theta      a prob_0.5 prob_0.6 prob_0.8
+   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1  0.03   4000    0.618    0.588    0.324
+ 2  0.03  40000    0.513    0.513    0.282
+ 3  0.03 400000    0.55     0.525    0.325
+ 4  0.1    4000    0.775    0.75     0.525
+ 5  0.1   40000    0.7      0.65     0.475
+ 6  0.1  400000    0.8      0.675    0.575
+ 7  0.3    4000    0.95     0.9      0.85 
+ 8  0.3   40000    0.9      0.9      0.825
+ 9  0.3  400000    0.95     0.95     0.825
+10  1      4000    0.975    0.975    0.95 
+11  1     40000    1        1        1    
+12  1    400000    1        1        1    </code></pre>
+</div>
+<h1 id="next-steps">Next steps</h1>
+<ul>
+<li>write out the model, and compute the coefficient of variation under it.</li>
+<li>write some background</li>
+<li>make the model more concrete, perhaps by framing as having a random relative abundance and Poisson sampling.</li>
+<li>start with a lower value of a, s.t. can see that sequencing depth matters until we’re seeing a large enough expected count</li>
+<li>investigate the errors during fitting</li>
+</ul>
+<h1 id="discussion">Discussion</h1>
+<p>Increasing the sequencing depth cannot make up for an increase in overdispersion.
+This makes sense — once we’re in a regime where the expected read count is above 0 and there is lots of overdispersion relative to Poisson, sequencing more doesn’t help much; it just helps us get a more precise measurement of the latent noisy (relative) abundance, and what we need is to reduce noise in that latent abundance.
+To do this, we need to measure more samples with independent relative abundances.
+We can reduce the noise from sample processing by processing the same sample repeatedly; however, for other noise sources we’d need to collect new samples from different sources or from more days.</p>
+<p>Note that because I use the correct model to fit the data, increasing the dispersion does not make the fit overconfident; the credible intervals are still tending to cover the true value of r the expected 90% of the time.
+In contrast, if I fit using Poisson regression instead, I expect the fit to be overconfident, that is that the credible intervals will be too small and we’ll be missing the true r more than 90% of the time, for the cases there theta is significantly less than 1.</p>
+<h1 class="appendix" id="session-info">Session info</h1>
+<details>
+<summary>
+Click for session info
+</summary>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>sessioninfo</span><span class='fu'>::</span><span class='fu'><a href='https://r-lib.github.io/sessioninfo/reference/session_info.html'>session_info</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>─ Session info ─────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       Arch Linux
+ system   x86_64, linux-gnu
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/New_York
+ date     2023-02-09
+ pandoc   3.0 @ /usr/bin/ (via rmarkdown)
+
+─ Packages ─────────────────────────────────────────────────────────────
+ package        * version  date (UTC) lib source
+ assertthat       0.2.1    2019-03-21 [1] CRAN (R 4.0.0)
+ backports        1.4.1    2021-12-13 [1] CRAN (R 4.1.2)
+ base64enc        0.1-3    2015-07-28 [1] CRAN (R 4.0.0)
+ bayesplot        1.9.0    2022-03-10 [1] CRAN (R 4.2.0)
+ beeswarm         0.4.0    2021-06-01 [1] CRAN (R 4.1.0)
+ boot             1.3-28   2021-05-03 [2] CRAN (R 4.2.2)
+ broom            1.0.1    2022-08-29 [1] CRAN (R 4.2.1)
+ broom.mixed    * 0.2.9.4  2022-04-17 [1] CRAN (R 4.2.0)
+ bslib            0.4.1    2022-11-02 [1] CRAN (R 4.2.2)
+ cachem           1.0.6    2021-08-19 [1] CRAN (R 4.1.1)
+ callr            3.7.3    2022-11-02 [1] CRAN (R 4.2.1)
+ cellranger       1.1.0    2016-07-27 [1] CRAN (R 4.0.0)
+ cli              3.4.1    2022-09-23 [1] CRAN (R 4.2.1)
+ codetools        0.2-18   2020-11-04 [2] CRAN (R 4.2.2)
+ colorspace       2.0-3    2022-02-21 [1] CRAN (R 4.2.0)
+ colourpicker     1.2.0    2022-10-28 [1] CRAN (R 4.2.1)
+ cowplot        * 1.1.1    2021-08-27 [1] Github (wilkelab/cowplot@555c9ae)
+ crayon           1.5.2    2022-09-29 [1] CRAN (R 4.2.1)
+ crosstalk        1.2.0    2021-11-04 [1] CRAN (R 4.1.2)
+ DBI              1.1.3    2022-06-18 [1] CRAN (R 4.2.1)
+ dbplyr           2.2.1    2022-06-27 [1] CRAN (R 4.2.1)
+ digest           0.6.30   2022-10-18 [1] CRAN (R 4.2.1)
+ distill          1.5.2    2022-11-10 [1] Github (rstudio/distill@9c1a1a2)
+ distributional   0.3.1    2022-09-02 [1] CRAN (R 4.2.1)
+ downlit          0.4.2    2022-07-05 [1] CRAN (R 4.2.1)
+ dplyr          * 1.1.0    2023-01-29 [1] CRAN (R 4.2.2)
+ DT               0.26     2022-10-19 [1] CRAN (R 4.2.1)
+ dygraphs         1.1.1.6  2018-07-11 [1] CRAN (R 4.0.2)
+ ellipsis         0.3.2    2021-04-29 [1] CRAN (R 4.1.0)
+ evaluate         0.18     2022-11-07 [1] CRAN (R 4.2.2)
+ fansi            1.0.3    2022-03-24 [1] CRAN (R 4.2.1)
+ farver           2.1.1    2022-07-06 [1] CRAN (R 4.2.1)
+ fastmap          1.1.0    2021-01-25 [1] CRAN (R 4.0.4)
+ forcats        * 0.5.2    2022-08-19 [1] CRAN (R 4.2.1)
+ fs             * 1.5.2    2021-12-08 [1] CRAN (R 4.1.2)
+ furrr          * 0.3.1    2022-08-15 [1] CRAN (R 4.2.1)
+ future         * 1.28.0   2022-09-02 [1] CRAN (R 4.2.1)
+ gargle           1.2.1    2022-09-08 [1] CRAN (R 4.2.1)
+ generics         0.1.3    2022-07-05 [1] CRAN (R 4.2.1)
+ ggbeeswarm     * 0.6.0    2017-08-07 [1] CRAN (R 4.0.0)
+ ggdist         * 3.2.0    2022-07-19 [1] CRAN (R 4.2.1)
+ ggplot2        * 3.3.6    2022-05-03 [1] CRAN (R 4.2.0)
+ ggridges         0.5.4    2022-09-26 [1] CRAN (R 4.2.1)
+ globals          0.16.1   2022-08-28 [1] CRAN (R 4.2.1)
+ glue             1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
+ googledrive      2.0.0    2021-07-08 [1] CRAN (R 4.1.0)
+ googlesheets4    1.0.1    2022-08-13 [1] CRAN (R 4.2.1)
+ gridExtra        2.3      2017-09-09 [1] CRAN (R 4.0.2)
+ gtable           0.3.1    2022-09-01 [1] CRAN (R 4.2.1)
+ gtools           3.9.3    2022-07-11 [1] CRAN (R 4.2.1)
+ haven            2.5.1    2022-08-22 [1] CRAN (R 4.2.1)
+ here           * 1.0.1    2020-12-13 [1] CRAN (R 4.0.5)
+ highr            0.9      2021-04-16 [1] CRAN (R 4.1.0)
+ hms              1.1.2    2022-08-19 [1] CRAN (R 4.2.1)
+ htmltools        0.5.3    2022-07-18 [1] CRAN (R 4.2.1)
+ htmlwidgets      1.5.4    2021-09-08 [1] CRAN (R 4.1.1)
+ httpuv           1.6.6    2022-09-08 [1] CRAN (R 4.2.1)
+ httr             1.4.4    2022-08-17 [1] CRAN (R 4.2.1)
+ igraph           1.3.5    2022-09-22 [1] CRAN (R 4.2.1)
+ inline           0.3.19   2021-05-31 [1] CRAN (R 4.1.0)
+ jquerylib        0.1.4    2021-04-26 [1] CRAN (R 4.1.0)
+ jsonlite         1.8.3    2022-10-21 [1] CRAN (R 4.2.1)
+ knitr            1.40     2022-08-24 [1] CRAN (R 4.2.1)
+ labeling         0.4.2    2020-10-20 [1] CRAN (R 4.0.3)
+ later            1.3.0    2021-08-18 [1] CRAN (R 4.1.1)
+ lattice          0.20-45  2021-09-22 [2] CRAN (R 4.2.2)
+ lifecycle        1.0.3    2022-10-07 [1] CRAN (R 4.2.1)
+ listenv          0.8.0    2019-12-05 [1] CRAN (R 4.0.0)
+ lme4             1.1-31   2022-11-01 [1] CRAN (R 4.2.1)
+ loo              2.5.1    2022-03-24 [1] CRAN (R 4.2.0)
+ lubridate        1.9.0    2022-11-06 [1] CRAN (R 4.2.2)
+ magrittr         2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
+ markdown         1.3      2022-10-29 [1] CRAN (R 4.2.1)
+ MASS             7.3-58.1 2022-08-03 [1] CRAN (R 4.2.1)
+ Matrix           1.5-1    2022-09-13 [1] CRAN (R 4.2.1)
+ matrixStats      0.62.0   2022-04-19 [1] CRAN (R 4.2.0)
+ memoise          2.0.1    2021-11-26 [1] CRAN (R 4.1.2)
+ mime             0.12     2021-09-28 [1] CRAN (R 4.1.1)
+ miniUI           0.1.1.1  2018-05-18 [1] CRAN (R 4.0.2)
+ minqa            1.2.5    2022-10-19 [1] CRAN (R 4.2.1)
+ modelr           0.1.9    2022-08-19 [1] CRAN (R 4.2.1)
+ munsell          0.5.0    2018-06-12 [1] CRAN (R 4.0.0)
+ nlme             3.1-160  2022-10-10 [2] CRAN (R 4.2.2)
+ nloptr           2.0.3    2022-05-26 [1] CRAN (R 4.2.0)
+ nvimcom        * 0.9-142  2022-12-22 [1] local
+ parallelly       1.32.1   2022-07-21 [1] CRAN (R 4.2.1)
+ patchwork      * 1.1.2    2022-08-19 [1] CRAN (R 4.2.1)
+ pillar           1.8.1    2022-08-19 [1] CRAN (R 4.2.1)
+ pkgbuild         1.3.1    2021-12-20 [1] CRAN (R 4.1.2)
+ pkgconfig        2.0.3    2019-09-22 [1] CRAN (R 4.0.0)
+ plyr             1.8.7    2022-03-24 [1] CRAN (R 4.2.0)
+ prettyunits      1.1.1    2020-01-24 [1] CRAN (R 4.0.0)
+ processx         3.8.0    2022-10-26 [1] CRAN (R 4.2.1)
+ promises         1.2.0.1  2021-02-11 [1] CRAN (R 4.0.4)
+ ps               1.7.2    2022-10-26 [1] CRAN (R 4.2.1)
+ purrr          * 0.3.5    2022-10-06 [1] CRAN (R 4.2.1)
+ R6               2.5.1    2021-08-19 [1] CRAN (R 4.1.1)
+ Rcpp           * 1.0.9    2022-07-08 [1] CRAN (R 4.2.1)
+ RcppParallel     5.1.5    2022-01-05 [1] CRAN (R 4.1.2)
+ readr          * 2.1.3    2022-10-01 [1] CRAN (R 4.2.1)
+ readxl           1.4.1    2022-08-17 [1] CRAN (R 4.2.1)
+ reprex           2.0.2    2022-08-17 [1] CRAN (R 4.2.1)
+ reshape2         1.4.4    2020-04-09 [1] CRAN (R 4.0.0)
+ rlang            1.0.6    2022-09-24 [1] CRAN (R 4.2.1)
+ rmarkdown      * 2.18     2022-11-09 [1] CRAN (R 4.2.2)
+ rprojroot        2.0.3    2022-04-02 [1] CRAN (R 4.2.2)
+ rstan            2.21.7   2022-09-08 [1] CRAN (R 4.2.1)
+ rstanarm       * 2.21.3   2022-04-09 [1] CRAN (R 4.2.0)
+ rstantools       2.2.0    2022-04-08 [1] CRAN (R 4.2.0)
+ rvest            1.0.3    2022-08-19 [1] CRAN (R 4.2.1)
+ sass             0.4.2    2022-07-16 [1] CRAN (R 4.2.1)
+ scales           1.2.1    2022-08-20 [1] CRAN (R 4.2.1)
+ sessioninfo      1.2.2    2021-12-06 [1] CRAN (R 4.1.2)
+ shiny            1.7.3    2022-10-25 [1] CRAN (R 4.2.1)
+ shinyjs          2.1.0    2021-12-23 [1] CRAN (R 4.1.2)
+ shinystan        2.6.0    2022-03-03 [1] CRAN (R 4.2.0)
+ shinythemes      1.2.0    2021-01-25 [1] CRAN (R 4.0.4)
+ StanHeaders      2.21.0-7 2020-12-17 [1] CRAN (R 4.0.3)
+ stringi          1.7.8    2022-07-11 [1] CRAN (R 4.2.2)
+ stringr        * 1.4.1    2022-08-20 [1] CRAN (R 4.2.1)
+ survival         3.4-0    2022-08-09 [2] CRAN (R 4.2.2)
+ threejs          0.3.3    2020-01-21 [1] CRAN (R 4.0.2)
+ tibble         * 3.1.8    2022-07-22 [1] CRAN (R 4.2.1)
+ tidyr          * 1.2.1    2022-09-08 [1] CRAN (R 4.2.1)
+ tidyselect       1.2.0    2022-10-10 [1] CRAN (R 4.2.1)
+ tidyverse      * 1.3.2    2022-07-18 [1] CRAN (R 4.2.1)
+ timechange       0.1.1    2022-11-04 [1] CRAN (R 4.2.2)
+ tzdb             0.3.0    2022-03-28 [1] CRAN (R 4.2.0)
+ utf8             1.2.2    2021-07-24 [1] CRAN (R 4.1.0)
+ vctrs            0.5.2    2023-01-23 [1] CRAN (R 4.2.2)
+ vipor            0.4.5    2017-03-22 [1] CRAN (R 4.0.0)
+ withr            2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
+ xfun             0.34     2022-10-18 [1] CRAN (R 4.2.1)
+ xml2             1.3.3    2021-11-30 [1] CRAN (R 4.1.2)
+ xtable           1.8-4    2019-04-21 [1] CRAN (R 4.0.0)
+ xts              0.12.2   2022-10-16 [1] CRAN (R 4.2.1)
+ yaml             2.3.6    2022-10-18 [1] CRAN (R 4.2.1)
+ zoo              1.8-11   2022-09-17 [1] CRAN (R 4.2.1)
+
+ [1] /home/michael/.local/lib/R/library
+ [2] /usr/lib/R/library
+
+────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</details>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="references">References</h3>
+  <div id="references-listing"></div>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
