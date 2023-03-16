@@ -1,0 +1,49 @@
+
+
+Background: Given observations of how much an rRNA depletion method reduces the proportion of rRNA reads, with and without the depletion method.
+We want to be able to determine the differential bias against rRNA relative to background, and predict how much the proportion of a virus or other non-rRNA sequencing would increase.
+
+
+Suppose 
+
+- $P$ is the proportion of rRNA NA
+- $\tilde P^{(x)}$ is the observed proportion of rRNA in the MGS reads, for protocol $x$
+- $B^{(x)}$ is the bias of rRNA relative to the background (the remaining $1-P$ of non-rRNA), for protocol $x$
+- $B^{(x/y)} = B^{(x)} / B^{(y)}$ is the differential bias of protocol $x$ relative to protocol $y$
+- Protocol 0 is without depletion
+- Protocol 1 is with depletion
+
+Note, I'm assuming an undefined but fixed background that I'm averaging over.
+That is mainly because the data shown in often just percent rRNA reads out of total.
+
+
+```{r}
+\tilde P^{(x)} = \frac{P \cdot B}{P \cdot B + (1-P)}
+```
+
+There is some benefit of working with odds in this context and definition of $B$.
+The effect of bias on the odds is just to multiply by $B$,
+
+```{r}
+\frac{\tilde P^{(x)}}{1 - \tilde P^{(x)}} = B \cdot \frac{P}{P \cdot B + (1-P)}
+```
+
+and so the differential bias can be estimated simply from the ratio of the odds in the measurement with versus without depletion,
+
+
+```{r}
+\frac{B^{(1)}}{B^{(0)}} = \frac{\tilde P^{(1)}/ (1 - \tilde P^{(1)})}{\tilde P^{(0)}/ (1 - \tilde P^{(0)})}.
+```
+
+Note, I don't expect $B^{(1/0)}$ to be independent of sample composition, if only because I expect a saturation effect where the more (absolute) rRNA in the sample, the lower fraction of total rRNA will be removed.
+
+What happens to species in the background fraction, when we have depletion?
+I believe this will depend on $P$ as well as the deplection effectiveness as given by $B^{(1/0)}$.
+
+Consider this [Jumpcode application note](https://www.jumpcodegenomics.com/wp-content/uploads/2022/09/app-note-CRISPRclean-Plus-increase-bacterial-detection-microbiome-stool-samples-042022-v1-1.pdf), in which the proportion of rRNA appears to decrease from around 0.97 to 0.28 for CRISPRclean Plus and 5ng input (Figure 3).
+The odds ratio is approximately 0.012, or a roughly 80-fold bias against rRNA relative to background.
+Note, the ratio of the proportions (0.28/0.97) is a much higher ~0.29.
+In this case, the very high fraction of rRNA means that we need to account for compositional effects to get an accurate estimate of how much of the rRNA is being depleted.
+
+
+
