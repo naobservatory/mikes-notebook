@@ -1,5 +1,5 @@
 ---
-title: "Basic detection theory"
+title: "WWTP basic detection theory"
 description: | 
   Notes exploring the factors that determine our ability to perform _basic detection_ in a WWTP setting. 
   By basic detection, I mean detection based on seeing a sufficient number of distinguishing reads from the pathogen, rather than from a spatiotemporal pattern such as exponential growth.
@@ -43,6 +43,10 @@ library(patchwork)
 library(ggbeeswarm)
 
 theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
 ```
 
 <!-- Links
@@ -52,7 +56,258 @@ theme_set(theme_cowplot())
 
 -->
 
-# Model and approximate dynamics
+# Detection under deterministic exponential growth
+
+I will assume a very simple model, but which can represent more complex cases so long as the outbreak has has established, and reached the asymptotic exponential growth rate in the number of infections, cumulative infections, and shedding amount, by using 'effective parameters'.
+Motivation: Mathematical simplicity for developing intuition; also, I assume that detection has a negligible chance of occurring before the outbreak reaches the exponential phase.
+
+Currently considers MGS-based detection only; future versions may add targeted detection and amplicon sequencing.
+
+Description of the basic model:
+
+- Deterministic exponential growth in the number of infected individuals.
+  - Intended to model the early stage of an outbreak where less than $\sim 1/3$ of the population have been infected.
+- The ratios of infected to infectious and to the total shedding rate assumed constant.
+  - Individual variation and randomness in disease time course and shedding are treated as affecting these ratios, and otherwise ignored.
+- Microbiome background shedding assumed constant and independent of infection status.
+- MGS results only depend on the relative abundances in the sample.
+- Effect of WW transport, sample collection, and sample processing on relative abundance of pathogen to background can be represented by a constant bias parameter.
+- Variability/noise in MGS read counts due to transport, sample collection, processing, and sequencing is ignored.
+
+In this section, we will use this basic model to derive the time, current infected fraction, and cumulative incidence when $M^*$ reads of a pathogen (or a particular k-mer in the pathogen's genome) are first seen on a single day or cumulatively.
+
+TODO
+
+- [ ] above, better distinguish between motivation/justification of the model and statement of the model.
+- [ ] above, better describe the purpose/message of this section
+- [ ] below, review and consider which details to move to later sections or an appendix
+
+## Epidemic dynamics
+
+Notation warning: Here, I'm taking $I$ to be the number of infections, which includes exposed but non-yet-infectious individuals.
+In other words, this would be $E + I$ in the SEIR model.
+
+Assume deterministic exponential growth of the current number of infected, $I(t)$, from some initial number $I_0 = I(0)$. 
+The number of infected at time $t$ (measured in days) has derivative
+\begin{align}
+  \frac{dI}{dt} &= (b - d) I = r I,
+\end{align}
+where $r > 0$ is the exponential growth rate.
+I further assume that $r$ can be broken into separate 'birth' and 'death' rates, $b$ and $d$, describing the rate at which infections beget new infections, and which infected individuals recover.
+Under this model, the number of infections at time $t$ grows as 
+\begin{align}
+  I(t) &\approx I_0 e^{rt}.
+\end{align}
+
+The cumulative number of infection-days at day $t$ is
+\begin{align}
+  \int_0^t I(u)\;du 
+    &= \int_0^t I_0 e^{ru}\;du
+  \\&= \frac{I_0}{r} \left(e^{rt} - 1 \right) 
+  \\&= \frac{1}{r} \left[I(t) - I(0) \right]
+  \\&\approx \frac{1}{r} I(t) \quad \text{for $t \gg 1/r$}.
+\end{align}
+
+We can calculate the cumulative number of infections $C(t)$ at day $t$ by noting that new infections occur at rate $b I(t)$; hence
+\begin{align}
+  C(t) 
+    &= \int_0^t b I(u)\;du 
+  \\&= \int_0^t b I_0 e^{ru}\;du 
+  \\&= \frac{b I_0}{r} \left(e^{rt} - 1 \right) 
+  \\&= \frac{b}{r} \left[I(t) - I(0) \right] 
+  \\&\approx \frac{b}{r} I(t) \quad \text{for $t \gg 1/r$}.
+\end{align}
+The cumulative number of infections is $b$ times the cumulative number of infection-days, and is approximately $b/r$ the number of current infections.
+Note: Arguably, we should be adding the initial number of infected, $I_0$, in which case we get
+\begin{align}
+  C(t) 
+    &= \int_0^t b I(u)\;du  + I_0
+  \\&= \frac{b}{r} \left[I(t) - I_0 \right] + I_0
+  \\&= \frac{b}{r} I(t) - \frac{d}{r} I_0.
+  \\&\approx \frac{b}{r} I(t) \quad \text{for $I(t) \gg I_0$}.
+\end{align}
+I will typically assume $I_0$ is a tiny fraction of all current and cumulative infections in the regimes of interest, so this distinction shouldn't matter.
+The condition $I(t) \gg I_0$ will be true for $t \gg 1/r$.
+
+Define _cumulative incidence_ $c(t)$ as the fraction of the population that have been infected by time $t$,
+\begin{align}
+  c(t) 
+    &= C(t) / N
+  \\&\approx \frac{b}{r} i(t) \quad \text{for $t \gg 1/r$}.
+\end{align}
+
+How long is the exponential approximation good for? 
+Suppose there is lasting immunity, such that each person can only be infected once.
+In that case, we expect the rate of new infections per capita, $b$, to be in proportional to $1 - c(t)$; i.e., $b(t) = [1 - c(t)] b_0$.
+The exponential approximation is good so long as $c(t) \ll 1$.
+A good rule of thumb could be to take the point when $c(t) \approx 1/e$ as the end of the exponential phase.
+This occurs when the currently infected fraction of the population $i(t)$ reaches $\tfrac{r}{b} e^{-1}$, or when $t \approx \tfrac{1}{r} [\log (\tfrac{r}{i_0 b}) - 1]$.
+(Needs to be checked)
+
+The peak of the epidemic (max value of $I$) will occur when $b$ decreases to $d$.
+This occurs when $c(t) = 1 - \tfrac{d}{b_0} = \tfrac{r_0}{b_0}$.
+The number of susceptible (those not infected) is $1 - c = d/b_0$, matching the standard SIR result (e.g. equation 4a [here](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7997702/)).
+
+## Shedding and sequencing
+
+Suppose the number of infected at time $t$ is then
+\begin{align}
+  I(t) &\approx I_0 e^{rt}.
+\end{align}
+where $I_0$ is the initial number of infected.
+Let $N$ be the total population (assumed fixed) and $i(t) = I(t) / N$ be the fraction of the population that is infected.
+
+Assume a constant amount of background shedding in each person regardless of infection status.
+Suppose a background shedding rate of $s_0$ of background microbiome in each person, regardless of infection status.
+Let $s$ be the relative rate of shedding of pathogen to background in an infected person, so that $s s_0$ is the rate of pathogen shedding in an infected person (note potential name clash with the fraction of the population that is susceptible).
+Let $B$ be the relative measurement effiency of the pathogen to the background (MGS bias).
+In the regime I consider below, where total threat reads are a small fraction of total reads, we can use $B$ to also account for the fact that perhaps only a small fraction of reads from the pathogen are useful for detecting it as a novel threat.
+
+The expected fraction (i.e. proportion) of the threat in the MGS reads in a sample collected on day $t$ is
+\begin{align}
+E [ P(t) ]
+  &\approx \frac{I(t) s s_0 B}{I(t) s s_0  B + N s_0 } 
+\\&= \frac{I(t) s B}{I(t) s B + N } 
+\\&= \frac{i(t) s B}{i(t) s B + 1 } 
+\\&\approx i(t) s B.
+\end{align}
+The first approximation comes from treating $I(t)$ as constant over the 24h the sample is collected (more on this below).
+The second approximation comes from assuming that the pathogen is always a small fraction of the reads ($i s B \ll 1$).
+One way for this condition to arise is that it holds even for a sample from an infected individual or an entirely infected population (i.e., $s B \ll 1$).
+I expect that to be true for subtle pathogens, but not necessary all pathogens (e.g., gastroenteric pathogens).
+For these latter cases I expect $i(t) \ll 1$ and for the broader condition $i s B \ll 1$ to still hold.
+
+To determine the absolute copy number or concentration of the pathogen in the sample, we'd need to say something about the overall shedding amount and water system. However, to analyze MGS detection, it is enough to consider the relative abundance as above.
+
+The expected number of sequencing reads of the threat on day $t$ is
+\begin{align}
+E [ M(t) ] = E [ P(t) ] \cdot \mathcal M \approx i(t) s B \mathcal M.
+\end{align}
+where $\mathcal M$ is the total sequencing depth, which I'm treating as a value that is determined by the experimenter and is the same for each day.
+
+More generally, if the sample is collected over a particular period of time $\Delta t$, we might want to model the pathogen contribution to the sample as an integral of shedding over that period,
+\begin{align}
+E [ M(t) ] 
+  &= s B \mathcal M \int_{t-\Delta t}{t} i(u) \; du
+\\&= s B \mathcal M \frac{1}{r} i_0 e^{rt} \left[1 - e^{-r \Delta t} \right]
+\\&= s B \mathcal M \frac{1}{r} i(t) \left[1 - e^{-r \Delta t} \right].
+\\&\approx i(t) (\Delta t) s B \mathcal M \quad \text{for $r \Delta t \ll 1$}.
+\end{align}
+
+## Detection
+
+Warning: The below assumes that $r \ll 1$, so that we can ignore the growth in $i(t)$ over the sampling period when computing the contribution of pathogen to the sample.
+
+Suppose there is a threshold number of reads (of the pathogen or the distinguishing subsequence), $M^*$, we need to see in a single day to detect the threat (e.g. 5).
+I'll take $\Delta t = 1$ (24-h composite sampling) and suppose that $r \ll 1$, so that we can ignore growth over the sampling window (otherwise, just multiply the number of expected reads by the constant factor $(1 - e^r)/r$).
+As a first approximation, let's ignore noise in shedding and sequencing measurement, and define detection as occurring when $E [M(t^*)] = M^*$.
+Detection then occurs at $i(t) s B \mathcal M = M^*$ or
+\begin{align}
+  i(t^*) = \frac{M^*}{s B \mathcal M}.
+\end{align}
+In the exponential regime where $i(t) = i_0 e^{rt}$ and cumulative incidence is $c(t) \approx \tfrac{b}{r} i(t)$, we have that 
+\begin{align}
+  t^* = \frac{1}{r} \log \frac{M^*}{i_0 s B \mathcal M}
+\end{align}
+\begin{align}
+  c(t^*) = \frac{b}{r} \cdot \frac{M^*}{s B \mathcal M}.
+\end{align}
+
+Note that the detection threshold and efficiency appear together as $M^* / B$; this means we'll get the same answer whether we think of 
+
+- $M^*$ is the number of reads hitting a particular identifying subsequence, and $B$ contains a factor $x < 1$ to account for the fact that only a fraction $x$ of the pathogen's reads hit the subsequence
+- $M^*$ is the number of reads hitting the pathogen, and we increase it by a factor $1/x$ to account for the fact that only $x$ of the reads are useful for identification; $B$ does not contain the factor $x$.
+
+However, when we start to consider noise in the read counts, we need to be more careful about this.
+
+**Joint dependence of many factors:**
+The effect of $s$, $B$, $M^*$ and $\mathcal M$ all occurs through the term $\frac{M^*}{s B \mathcal M}$.
+(This should match our preexisting intuition.)
+Thus, for example, we can lower sequencing by 2-fold if we can enrich for the pathogen 2-fold (by, for exampling, doing a better job of removing bacterial NA for viral detection).
+
+**Effect of sequencing effort:**
+These results explain the pattern seen in the example simulations presented by Charlie Whittaker last December, in which we saw that the time of detection decreases logarithmically $\mathcal M$ and cumulative incidence at time of detection decreases as $1 / \mathcal M$.
+As per the previous point, we see the same behavior when we vary $s$, $B$, or $1/M^*$.
+
+
+### Cumulative reads over a given period
+
+What if it is sufficient to see $R^*$ reads cumulatively over the last $T$ days?
+Call $Q$ the cumulative reads over the last $T$ days.
+Then
+\begin{align}
+E [ Q(t) ] 
+  &= s B \mathcal M \int_{t-T}{t} i(u) \; du
+\\&= s B \mathcal M i(t) \frac{1}{r} \left[1 - e^{-r T} \right].
+\end{align}
+Setting $T = t$ corresponds to all reads since time $0$; in that case, we have that $E [ Q(t) ]$ equals $s B \mathcal M$ times the cumulative infection hours, or approximately
+\begin{align}
+E [ Q(t) ] 
+  &\approx s B \mathcal M \frac{i(t)}{r}
+  \\&\approx s B \mathcal M \frac{c(t)}{b}
+\end{align}
+Considering the factor $1 - e^{-rT}$ indicates that it is only the samples from the past few characteristic growth periods that contributes significantly to the total reads.
+
+How much better do we do, detection wise, when we only require cumulative reads to reach $M^*$?
+Detection now occurs at $E[Q(t)] = M^*$ or
+\begin{align}
+  i(t^*) &= \frac{r M^*}{s B \mathcal M} \\
+  c(t^*) &= b \cdot \frac{M^*}{s B \mathcal M};
+\end{align}
+these are both a factor $r$ greater than before.
+As expected, the effect on time is only logarithmic,
+\begin{align}
+  t^* = \frac{1}{r} \log \frac{r M^*}{i_0 s B \mathcal M}.
+\end{align}
+The effect overall is as if we increased any of $\mathcal M$, $s$, or $B$ by a factor of $1/r$.
+
+## Further discussion
+
+#### MGS monitoring performance is independent of WWTP catchment size and flow rate
+
+- WWTP catchment size and flow rate do not affect the quantities of interest at the time of detection.
+- This is because, in the model, the MGS reads are determined by the relative abundance of the pathogen in the sample, which is determined by the relative abundance of pathogen in the catchment; and we were interested in the prevalence (relative abundance of infected) in the catchment at time of detection, rather than absolute infection numbers.
+- Also, I assume detection occurs in a regime where stochastic effects from small infection numbers are negligible.
+- This would be very useful to know if true, since it would allow us to use estimates from a variety of WWTPs or other WW monitoring locations interchangeably.
+- Contrast with targeted detection, where the absolute concentration of the pathogen matters, and so total infected, flow rate, and effective concentration factor of the protocol, become relevant.
+
+Some caveats
+
+- For these results to hold, it is important that detection occurs in the exponential quasi-equilibrium phase. This implies that the population must be large enough and detection ability is not too high.
+- I also assumed we can ignore noise from transmission and shedding; this similarly requires that there is enough absolute numbers of infections at the time of detection.
+
+# Applications
+
+## Example: SARS2 reads in Southern California WWTP data
+
+@rothman2021rnav perform untargeted viral RNA sequencing of samples from several WWTPs in Southern California, with and without enrichment for specific viruses including SARS2.
+[Jeff previously estimated](https://docs.google.com/document/d/1XVeLyc1Peh59mILGtie8bB2eC7Mke7Byq77tiqs7Ih8/edit#heading=h.dshnx0efqzl4) that the proportion of SARS2 reads in a WWTP sample measured without enrichment is 3e-7 when the daily incidence (fraction of the population infected in a day) is 1e-3.
+What can we say in general about the proportion of SARS2 reads at a given prevalence in the population?
+
+First, we need to connect the current daily incidence 1e-3 to the current prevalence.
+In our baseline model, the new infections per day is approximately $b \: i(t)$, where $b$ is the rate of new infections per infected and $i(t)$ is the fraction of the population that is infected.
+
+We can estimate $b$ from the rough estimates of $R_0$ and the (average) generation time compiled by Lenni last summer, where generation time is defined as
+
+> Generation time is a modelling term describing the time duration from the onset of infectiousness in a primary case to the onset of infectiousness in a secondary case infected by the primary case. [source](https://nccid.ca/publications/glossary-terms-infectious-disease-modelling-proposal-consistent-language/#:~:text=latent%E2%80%99%20(see%C2%A0below).-,Generation%20time,-Generation%20time%20is)
+
+In our model, in which infectiousness is constant over the course of the disease, the average generation time is $1/d$ and $R_0 = b/d$, so that $b = R_0 d$.
+Lenni's point estimates were $\hat R_0 = 3$ and an average generation time of $5.1$ days (corresponding to $\hat d = 1/5.1 \approx 0.2$, giving a point estimate for $b$ of $\hat b = 3 / 5.1 \approx 0.59$.
+(A future improvement would consider estimates specifically for this population and time period.)
+At this value of $b$, a daily incidence of $10^{-3}$ corresponds to a prevalence of $i(t) = 10^{-3}/\hat b \approx 1.7 \cdot 10^{-3}$.
+
+Therefore we have $P = 3\cdot 10^{-7}$ when $i = 1.7 \cdot 10^{-3}$, so that $sB = P / i = 1.8 \cdot 10^{-4} \sim 10^{-4}$.
+From
+\begin{align}
+  \mathcal M = \frac{M^*}{s B i(t^*) },
+\end{align}
+we can compute that we would need to sequence a single sample to a depth of $\sim 10^{9}$ fragments to see 10 fragments of SARS2 when $i = 10^{-4}$ of the population is infected.
+
+What about seeing an individual 40-mer in the SARS2 genome 10 times when $i = 10^{-4}$, for 1x150bp sequencing?
+In this case, roughly $10^{-2.5}$ of SARS2 reads will cover the 40-mer ($(150 - 40 + 1) / 30000$), so that we'd need to increase our sequencing depth by $10^{2.5}$-fold relative to the case of just seeing the genome 10 times, resulting in a total sequencing depth of $10^{11.5}$ reads.
+
+
+# Details and complications
 
 General assumptions
 
@@ -246,15 +501,25 @@ r_pred = (-(theta + gamma) + sqrt((theta - gamma)^2 + 4 * theta * beta * N)) / 2
 x <- sol %>%
   mutate(
     across(everything(), as.numeric),
-    I_pred = pmin(exp(r_pred * time), N)
+    I_pred = pmin(exp(r_pred * time), N),
   ) %>%
-  pivot_longer(-time)
+  pivot_longer(-time) %>%
+  mutate(across(name, fct_inorder))
+
+clrs <- c(
+  S = colors_oi[['orange']],
+  E = colors_oi[['skyblue']],
+  I = colors_oi[['bluishgreen']],
+  R = colors_oi[['vermillion']],
+  I_pred = colors_oi[['gray']] 
+)
 ```
 
 ```{r}
 x %>%
   filter(time <= 200, name != 'I_pred') %>%
   ggplot(aes(time, value, color = name)) +
+  scale_color_manual(values = clrs) +
   geom_line() +
   labs(y = "Number of individuals")
 ```
@@ -263,6 +528,7 @@ x %>%
 x %>%
   filter(time <= 200, name != 'S') %>%
   ggplot(aes(time, value, color = name)) +
+  scale_color_manual(values = clrs) +
   scale_y_log10(limits = c(1, N), breaks = c(1, 1e2, 1e4, 1e6)) +
   geom_line() +
   labs(y = "Number of individuals")
@@ -567,7 +833,7 @@ How large is enough?
 
 It is reasonable to suppose that each infected person sheds independentally, and therefore the CV in the total amount shed on a given day scales as $1/\sqrt{n}$, where $n$ is the number of infected shedders.
 However, each infected shedder does not contribute equally to shedding --- any 'super shedders' or people who are in the peak shedding period will contribute (on average) much more than others.
-For a given assumption about the shedding timecourse and how it varies among infected individuals, there will be some effective size $n_e$, which will be less than the total number of shedders $n$, that captures how the $CV$ decreases.
+For a given assumption about the shedding timecourse and how it varies among infected individuals, there will be some effective number of shedders, $n_e$, which will be less than the total number of shedders $n$, that captures how the $CV$ decreases.
 At quasi-equilibrium, there will be a fixed distribution of shedders and $n_e \propto n$.
 
 What we ultimately care about is the shedding contributing to an individual WWTP sample.
@@ -576,18 +842,24 @@ Our current guess is that most shedding will be arrive at the sampling site with
 
 We can get a sense of the effective number of shedders contributing to a WWTP sample from studies that have attempted to link SARS2 or influenza WWTP levels to local prevalence, divided by the mean daily shedding rate observed in studies that assess fecal shedding in individuals.
 
-## Transport and sample collection
+## Transport
 
-NOTE: much of this is structurally the same as for shedding
+It takes time for the waste to travel to the WWTP, (I think) typically on the order of hours to days.
+This time depends on the location and its distance from the WWTP, along with other factors such as the typical flow rates in the various pipes and effects on the flow such as usage and rain.
+At a most basic level, the effect of transport is to create a lag between shedding and MGS signal and therefore to delay when an outbreak is detected by a corresponding amount.
+But perhaps more important is what happens to the waste during this time.
+I address both in turn.
 
+### Effect of transport time
 
-Basic model: see Will's pdf as starting point.
-Important complications --- shedding will be taking place all over the city, at different times, randomly.
-The signal from a given shedding event may spread out over days.
-But in the regimes where we can detect things, guess that we can capture these complications by an effective recovery parameter.
+It takes time for the waste to travel to the WWTP.
+How does this affect the pathogen relative abundance at the point of sampling?
 
-Complications: rain and/or other large perturbations to the WW system.
-Can we capture this with our main noise parameter?
+Complications include
+* Shedding will be taking place all over the city, at different times, randomly.
+* The signal from a given shedding event may spread out over days.
+* But in the quasi-exponential regime, I guess that we can capture these complications by an effective recovery parameter.
+* Rain and/or other large perturbations to the WW system. Can we capture this with an effective noise (CV) parameter?
 
 As a way to get intuition, suppose that the amount being shed into the WW system at time $t$ is given by $S(t)$ and that the fraction of NA collected in the sample a time $t$ after it is shed is given by $w(t)$.
 The amount of NA collected at time $t$, $W(t)$, is given by the convolution of $S$ and $w$,
@@ -662,11 +934,67 @@ This guess is based on
 
 @soller2022mode notes that, for samples of settled solids, the time the pathogen spends in the WWTP before sample collection may be larger than the time spent traveling to the WWTP.
 
+2023-03-31: I've updated towards transit times being significantly longer than what is suggested above for our local WWTP, around 12h for Cambridge and up to ~3 days for the farthest locations (Framingham).
+
+### Changes in waste composition during transport
+
+During transport, there will be live biological and chemical activity, which can affect the composition of the sample collected and in particular the relative abundance of the pathogen.
+The relative abundance of the pathogen NA (the proportion of pathogen NA among total NA) will change due to 
+
+1. Growth of the pathogen is possible but does not seem relevant for most pathogens, which I expect to only replicate in human cells, but could be true for some pathogens that can replicate in the GI tract or the environment
+2. Degredation or decay of the pathogen, either due to chemical reactions, physical forces, or biological factors (viruses and their NA may be destroyed or consumed by microbes; microbes may be killed by viruses or other microbes).
+3. Growth and other biological activity of the background and sewage microbiome. This will tend to decrease the relative abundance of the pathogen.
+4. Degredation or decay of the background. This too could be substantial and would serve to increase the relative abundances of the pathogen.
+
+Growth and metabolism of members of the microbiome that are more adapted to the sewer environment may may substantially lower the relative abundance of the pathogen (and thus its MGS reads) via purely compositional effects (increase in background abudance lowers pathogen relative abundance) and via increasing the decay of the pathogen through destruction/consumption.
+
+There may also be a resident sewer microbiome, which could be contributing an additional amount of non-pathogen NA and adding to the decay of the pathogen. 
+
+Note, the pathogen and background will be changing physical form and it isn't obvious how that will affect the resulting MGS data. E.g. a virus can be killed or inactivated but still yield NA.
+
+The period in the primary clarifier may also be important for solids samples, depending on how long that time is and how more/less hospitable that setting is.
+
+We can write out the relevant math. The contribution of the native sewage microbiome can be modeled by a fixed additional contribution, which will have different MGS bias. The differences in growth and decay can be modeled to first approximation with organism-dependent bias factors that scale with transport time, though this approximation might have important limitations.
+
+We can try lit review to consider how we can expect various organisms to behave during transport.
+I expect that the math will tell us that it is the pathogen's growth/decay, and the most abundant (weighted in terms of $sB$) of the background organisms that most matter here.
+
 ## Sample collection
 
-# Detection methods
+Consider implications of different sample types, particularly influent versus settled solids.
 
-## Metagenomic sequencing
+### Partitioning into solid and liquid fractions
+
+How the virus and the background partition into the solid versus liquid fraction will influence the relative bias parameter $B$.
+Further, if the partitioning is non-linear, then it will effectively make $B$ no longer a constant.
+
+@kim2022sars fit a version of the Freundlich isotherm model,
+
+\begin{align}
+  C_s = K_f C_l^{1/n},
+\end{align}
+
+where
+
+- $C_s$ is the concentration in the solid fraction (copies per g)
+- $C_l$ is the concentration in the liquid fraction (copies per mL)
+- $K_f$ is a coefficient (ml per g)
+- $n$ is a coefficient (unitless) that determines the exponent $1/n$ and hence linearity of the relationship between $C_s$ and $C_l$
+
+They fit this model using measured concentration in influent for $C_l$ and the measured concentration in settled solids for $C_s$, using linear regression of $\log C_s$ against $\log C_l$.
+They do so separately for 5 treatment plants, finding results consistent with $n \in [2,3]$ and $K_f \in [10^3, 10^5]$ mL g$^{-1}$.
+Notably, the fact that $\hat n \ge 2$ suggests that the relationship between $C_s$ and $C_l$ is not linear; instead, $C_s$ increases more slowly than $C_l$.
+Note: When I examined the data by eye, I observed a poor fit which suggests we shouldn't take these results too literally.
+
+It is hard to say what this implies about MGS measurements without also knowing how the concentration of the background behaves.
+This study also performs measurments of PMMoV; it and related Tobamaviruses are important members of the background for RNA-based protocols.
+However, non-enveloped viruses as well as bacteria are important background members which we might expect to behave quite differently.
+
+Future studies that use metagenomics of paired influent and solids samples can consider how the $K_f$ and $n$ parameters vary across different types of organisms.
+
+## Detection methods
+
+### Metagenomic sequencing
 
 A few features of metagenomic sequencing to be aware of
 
@@ -716,7 +1044,7 @@ gamma_dists <- tibble(mean = mu, cv = c(0.1, 0.3, 1, 3)) %>%
 clrs <- RColorBrewer::brewer.pal(name="Greens", n=5)[2:5]
 gamma_dists %>%
   mutate(across(cv, as.factor)) %>%
-  ggplot(aes(x / mu, density, color = cv)) +
+  ggplot(aes(x / mu, density, color = cv, linetype = cv)) +
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank()
@@ -733,6 +1061,10 @@ A CV of 1 corresponds to an exponential distribution, which has it's mode at 0.
 Higher CVs corresponds to distributions that are even more sharply peaked at 0.
 As the CV decreases, the distribution becomes like a normal distribution with a shrinking standard deviation.
 Changing the mean without changing the CV rescales the entire distribution, keeping the same overall shape.
+
+The CV of 1 looks quite different in form, and a CV of 3 is already quite extreme.
+For CVs of 3 or more, we begin to have large consequences for probability of detection (see below).
+It will be helpful to find upper bounds on the CV to ensure we can ignore complications that arise when the CV is similar or larger than 1.
 
 The read count $M$ then has a Gamma-Poisson (GP) distribution, also known as a Negative Binomial distribution.
 The mean $E[M]$ under the GP model is the same as that of the underlying Gamma distribution, $\mu$.
@@ -753,8 +1085,106 @@ Next
 - Explain how bias in sample prep and after can both be captured by the $B$ parameter
 - Perhaps down below, consider the effect of noise on detection i.e. the probability of seeing a certain number of reads
 - Covering a target
+- In future version, perhaps put GP definition and features in an Appendix
 
-### Reads fully covering a target (sub-)sequence
+
+
+
+Probability of seeing zero reads as a function of the mean or CV parameter.
+Can look at using the negative binomial distribution in R; set the 'mu' parameter equal to the mean of the gamma rv, and the 'size' parameter equal to the shape (or $1/\kappa^2$) of the gamma rv.
+
+```{r}
+nb_prob <- crossing(mean = 10^seq(-2, 3, by = 0.02), cv = c(0.01, 0.1, 1, 3, 10)) %>%
+  mutate(
+    # Standard gamma params
+    scale = cv^2 * mean,
+    shape = 1 / cv^2,
+    # neg binom params
+    mu = mean,
+    size = shape
+  ) %>%
+  mutate(
+    prob_0 = dnbinom(x = 0, mu = mean, size = shape),
+    prob_ge_1 = pnbinom(q = 0, mu = mean, size = shape, lower.tail = FALSE),
+    prob_ge_10 = pnbinom(q = 9, mu = mean, size = shape, lower.tail = FALSE),
+  )
+```
+
+```{r}
+clrs <- RColorBrewer::brewer.pal(name="Greens", n=5)[2:5]
+nb_prob %>%
+  filter(cv < 10, mean <= 1e2) %>% 
+  mutate(across(cv, as.factor)) %>%
+  ggplot(aes(mean, prob_0, color = cv, linetype = cv)) +
+  scale_x_log10() +
+  # scale_y_log10(limits = c(1e-10, 1)) +
+  theme(
+    # axis.text.y = element_blank(),
+    # axis.ticks.y = element_blank()
+  ) +
+  scale_color_manual(values = clrs) +
+  # scale_color_brewer(type = 'seq', palette = 5,
+  #                    values = ~scales::rescale(.x, to = c(0, 0.5))) +
+  labs(y = 'Pr(X = 0)') +
+  geom_line(size = 0.8)
+```
+
+```{r}
+clrs <- RColorBrewer::brewer.pal(name="Greens", n=5)[2:5]
+nb_prob %>%
+  filter(cv < 10, mean <= 1e2) %>% 
+  mutate(across(cv, as.factor)) %>%
+  ggplot(aes(mean, prob_ge_1, color = cv, linetype = cv)) +
+  scale_x_log10() +
+  scale_y_log10() +
+  theme(
+    # axis.text.y = element_blank(),
+    # axis.ticks.y = element_blank()
+  ) +
+  scale_color_manual(values = clrs) +
+  # scale_color_brewer(type = 'seq', palette = 5,
+  #                    values = ~scales::rescale(.x, to = c(0, 0.5))) +
+  labs(y = 'Pr(X >= 1)') +
+  geom_hline(yintercept = 0.5, color = 'grey') +
+  geom_line(size = 0.8)
+```
+
+See that, for probability of 0 reads, a CV of 0.1 or less is indistinguishable from Poisson, but a CV on the order of 1 or more has a significant effect.
+The point where detection becomes more likely than not (grey line) is similar for CV <= 1, but becomes much larger for CV = 3 (about 100-fold larger).
+These plots also show that there is a monotonic relationship of CV with probability of detection via a single read, where a larger CV lowers the probabability for every mean.
+
+Next, consider the probability of detection in 10 or more reads,
+
+```{r}
+clrs <- RColorBrewer::brewer.pal(name="Greens", n=5)[2:5]
+nb_prob %>%
+  filter(cv < 10, mean >= 1e-1) %>% 
+  mutate(across(cv, as.factor)) %>%
+  ggplot(aes(mean, prob_ge_10, color = cv, linetype = cv)) +
+  scale_x_log10() +
+  scale_y_log10(limits = c(1e-4, 1)) +
+  theme(
+    # axis.text.y = element_blank(),
+    # axis.ticks.y = element_blank()
+  ) +
+  scale_color_manual(values = clrs) +
+  # scale_color_brewer(type = 'seq', palette = 5,
+  #                    values = ~scales::rescale(.x, to = c(0, 0.5))) +
+  labs(y = 'Pr(X >= 10)') +
+  geom_hline(yintercept = 0.5, color = 'grey') +
+  geom_line(size = 0.8)
+```
+
+Here, the relationship of detection probability vs CV is more complicated, and depends on the mean.
+At low means, where detection is extremely unlikely, then the larger CV helps by making these unlikely tail events more probable.
+Fairly unprobably events, on the order of say 1e-2 or 1e-3, may still be observed when we are testing hundreds or thousands of samples.
+Regarding when detection becomes more likely than not (grey line), we see something similar to single-read detection.
+There is only a small increase for CV of 1 relative to Poisson, and a roughly 100-fold increase for CV of 3.
+
+It should be easy to use the probability mass function of the neg binomial to examine how the mean and cv affect the probability of seeing 0 reads.
+
+
+#### Reads fully covering a target (sub-)sequence
 
 In some cases, we might be interested in how many reads that fully cover a particular subsequence, such as a particular 40-mer in the pathogen's genome.
 
@@ -793,204 +1223,40 @@ I have less of a handle on how this works with ONT, though I wouldn't be surpris
 
 TODO: find my notes from Metasub on this topic
 
-## qPCR
+### Targeted detection using qPCR or dPCR
 
-## Amplicon sequencing
+In future, I'll add notes on qPCR and dPCR, as standard methods for targeted detection of pathogens.
 
-# Detection under deterministic exponential growth
+### Amplicon sequencing
 
-I will assume a very simple model, but which can represent more complex cases so long as the outbreak has has established, and reached the asymptotic exponential growth rate in the number of infections, cumulative infections, and shedding amount, by using 'effective parameters'.
-Motivation: Mathematical simplicity for developing intuition; also, I assume that detection has a negligible chance of occurring before the outbreak reaches the exponential phase.
+In future, I'll add some notes on amplicon sequencing, which is the primary method used for sequencing SARS-CoV-2 in wastewater (to identify and monitor variants).
 
-## Epidemic dynamics
+- Amplicon sequencing involves using PCR to amplify one or more regions of the target organism's genome, and then sequencing the resulting amplicons.
+- For SARS-CoV-2, it is common to use a tiling amplicon approach, where the genome is divided into overlapping amplicons of a fixed length, and each amplicon is amplified and sequenced simultaneously.
+- We are interested in questions such as at what point in its spread do we detect a new mutation or variant. The key difference from MGS is that what matters for amplicon sequencing is the relative abundance of the variant relative to the amplified genomes, rather than all genomes.
+- The same more detailed MGS model, described in my previous work, can be used to derive appropriate simplified models for MGS and amplicon sequencing, by appropriate choice of the efficiency parameters
+- For the simplified amplicon model, we can restrict the 'background' to just the target species (assuming negligible off-target amplification). This amounts to setting $B=0$ for other species. We need to consider bias among variants within the target species, which can arise for example due to mutations in the primer-binding regions.
 
-Notation warning: Here, I'm taking $I$ to be the number of infections, which includes exposed but non-yet-infectious individuals.
-In other words, this would be $E + I$ in the SEIR model.
+# Notes
 
-Assume deterministic exponential growth of the current number of infected, $I(t)$, from some initial number $I_0 = I(0)$. 
-The number of infected at time $t$ (measured in days) has derivative
-\begin{align}
-  \frac{dI}{dt} &= (b - d) I = r I,
-\end{align}
-where $r > 0$ is the exponential growth rate.
-I further assume that $r$ can be broken into separate 'birth' and 'death' rates, $b$ and $d$, describing the rate at which infections beget new infections, and which infected individuals recover.
-Under this model, the number of infections at time $t$ grows as 
-\begin{align}
-  I(t) &\approx I_0 e^{rt}.
-\end{align}
-
-The cumulative number of infection-days at day $t$ is
-\begin{align}
-  \int_0^t I(u)\;du 
-    &= \int_0^t I_0 e^{ru}\;du
-  \\&= \frac{I_0}{r} \left(e^{rt} - 1 \right) 
-  \\&= \frac{1}{r} \left[I(t) - I(0) \right]
-  \\&\approx \frac{1}{r} I(t) \quad \text{for $t \gg 1/r$}.
-\end{align}
-
-We can calculate the cumulative number of infections $C(t)$ at day $t$ by noting that new infections occur at rate $b I(t)$; hence
-\begin{align}
-  C(t) 
-    &= \int_0^t b I(u)\;du 
-  \\&= \int_0^t b I_0 e^{ru}\;du 
-  \\&= \frac{b I_0}{r} \left(e^{rt} - 1 \right) 
-  \\&= \frac{b}{r} \left[I(t) - I(0) \right] 
-  \\&\approx \frac{b}{r} I(t) \quad \text{for $t \gg 1/r$}.
-\end{align}
-The cumulative number of infections is $b$ times the cumulative number of infection-days, and is approximately $b/r$ the number of current infections.
-Note: Arguably, we should be adding the initial number of infected, $I_0$, in which case we get
-\begin{align}
-  C(t) 
-    &= \int_0^t b I(u)\;du  + I_0
-  \\&= \frac{b}{r} \left[I(t) - I_0 \right] + I_0
-  \\&= \frac{b}{r} I(t) - \frac{d}{r} I_0.
-  \\&\approx \frac{b}{r} I(t) \quad \text{for $I(t) \gg I_0$}.
-\end{align}
-I will typically assume $I_0$ is a tiny fraction of all current and cumulative infections in the regimes of interest, so this distinction shouldn't matter.
-The condition $I(t) \gg I_0$ will be true for $t \gg 1/r$.
-
-Define _cumulative incidence_ $c(t)$ as the fraction of the population that have been infected by time $t$,
-\begin{align}
-  c(t) 
-    &= C(t) / N
-  \\&\approx \frac{b}{r} i(t) \quad \text{for $t \gg 1/r$}.
-\end{align}
-
-How long is the exponential approximation good for? 
-Suppose there is lasting immunity, such that each person can only be infected once.
-In that case, we expect the rate of new infections per capita, $b$, to be in proportional to $1 - c(t)$; i.e., $b(t) = [1 - c(t)] b_0$.
-The exponential approximation is good so long as $c(t) \ll 1$.
-A good rule of thumb could be to take the point when $c(t) \approx 1/e$ as the end of the exponential phase.
-This occurs when the currently infected fraction of the population $i(t)$ reaches $\tfrac{r}{b} e^{-1}$, or when $t \approx \tfrac{1}{r} [\log (\tfrac{r}{i_0 b}) - 1]$.
-(Needs to be checked)
-
-The peak of the epidemic (max value of $I$) will occur when $b$ decreases to $d$.
-This occurs when $c(t) = 1 - \tfrac{d}{b_0} = \tfrac{r_0}{b_0}$.
-The number of susceptible (those not infected) is $1 - c = d/b_0$, matching the standard SIR result (e.g. equation 4a [here](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7997702/)).
-
-## Shedding and sequencing
-
-Suppose the number of infected at time $t$ is then
-\begin{align}
-  I(t) &\approx I_0 e^{rt}.
-\end{align}
-where $I_0$ is the initial number of infected.
-Let $N$ be the total population (assumed fixed) and $i(t) = I(t) / N$ be the fraction of the population that is infected.
-
-Assume a constant amount of background shedding in each person regardless of infection status.
-Suppose a background shedding rate of $s_0$ of background microbiome in each person, regardless of infection status.
-Let $s$ be the relative rate of shedding of pathogen to background in an infected person, so that $s s_0$ is the rate of pathogen shedding in an infected person (note potential name clash with the fraction of the population that is susceptible).
-Let $B$ be the relative measurement effiency of the pathogen to the background (MGS bias).
-In the regime I consider below, where total threat reads are a small fraction of total reads, we can use $B$ to also account for the fact that perhaps only a small fraction of reads from the pathogen are useful for detecting it as a novel threat.
-
-The expected fraction (i.e. proportion) of the threat in the MGS reads in a sample collected on day $t$ is
-\begin{align}
-E [ P(t) ]
-  &\approx \frac{I(t) s s_0 B}{I(t) s s_0  B + N s_0 } 
-\\&= \frac{I(t) s B}{I(t) s B + N } 
-\\&= \frac{i(t) s B}{i(t) s B + 1 } 
-\\&\approx i(t) s B.
-\end{align}
-The first approximation comes from treating $I(t)$ as constant over the 24h the sample is collected (more on this below).
-The second approximation comes from assuming that the pathogen is always a small fraction of the reads ($i s B \ll 1$).
-One way for this condition to arise is that it holds even for a sample from an infected individual or an entirely infected population (i.e., $s B \ll 1$).
-I expect that to be true for subtle pathogens, but not necessary all pathogens (e.g., gastroenteric pathogens).
-For these latter cases I expect $i(t) \ll 1$ and for the broader condition $i s B \ll 1$ to still hold.
-
-To determine the absolute copy number or concentration of the pathogen in the sample, we'd need to say something about the overall shedding amount and water system. However, to analyze MGS detection, it is enough to consider the relative abundance as above.
-
-The expected number of sequencing reads of the threat on day $t$ is
-\begin{align}
-E [ M(t) ] = E [ P(t) ] \cdot \mathcal M \approx i(t) s B \mathcal M.
-\end{align}
-where $\mathcal M$ is the total sequencing depth, which I'm treating as a value that is determined by the experimenter and is the same for each day.
-
-More generally, if the sample is collected over a particular period of time $\Delta t$, we might want to model the pathogen contribution to the sample as an integral of shedding over that period,
-\begin{align}
-E [ M(t) ] 
-  &= s B \mathcal M \int_{t-\Delta t}{t} i(u) \; du
-\\&= s B \mathcal M \frac{1}{r} i_0 e^{rt} \left[1 - e^{-r \Delta t} \right]
-\\&= s B \mathcal M \frac{1}{r} i(t) \left[1 - e^{-r \Delta t} \right].
-\\&\approx i(t) (\Delta t) s B \mathcal M \quad \text{for $r \Delta t \ll 1$}.
-\end{align}
-
-## Detection
-
-Warning: The below assumes that $r \ll 1$, so that we can ignore the growth in $i(t)$ over the sampling period when computing the contribution of pathogen to the sample.
-
-Suppose there is a threshold number of reads (of the pathogen or the distinguishing subsequence), $M^*$, we need to see in a single day to detect the threat (e.g. 5).
-I'll take $\Delta t = 1$ (24-h composite sampling) and suppose that $r \ll 1$, so that we can ignore growth over the sampling window (otherwise, just multiply the number of expected reads by the constant factor $(1 - e^r)/r$).
-As a first approximation, let's ignore noise in shedding and sequencing measurement, and define detection as occurring when $E [M(t^*)] = M^*$.
-Detection then occurs at $i(t) s B \mathcal M = M^*$ or
-\begin{align}
-  i(t^*) = \frac{M^*}{s B \mathcal M}.
-\end{align}
-In the exponential regime where $i(t) = i_0 e^{rt}$ and cumulative incidence is $c(t) \approx \tfrac{b}{r} i(t)$, we have that 
-\begin{align}
-  t^* = \frac{1}{r} \log \frac{M^*}{i_0 s B \mathcal M}
-\end{align}
-\begin{align}
-  c(t^*) = \frac{b}{r} \cdot \frac{M^*}{s B \mathcal M}.
-\end{align}
-
-These results explain the pattern seen in the example simulations presented by Charlie Whittaker last December, in which we saw that the time of detection decreases logarithmically $\mathcal M$ and cumulative incidence at time of detection decreases as $1 / \mathcal M$.
-
-Note that the detection threshold and efficiency appear together as $M^* / B$; this means we'll get the same answer whether we think of 
-
-- $M^*$ is the number of reads hitting a particular identifying subsequence, and $B$ contains a factor $x < 1$ to account for the fact that only a fraction $x$ of the pathogen's reads hit the subsequence
-- $M^*$ is the number of reads hitting the pathogen, and we increase it by a factor $1/x$ to account for the fact that only $x$ of the reads are useful for identification; $B$ does not contain the factor $x$.
-
-However, when we start to consider noise in the read counts, we need to be more careful about this.
-
-### Cumulative reads over a given period
-
-What if it is sufficient to see $R^*$ reads cumulatively over the last $T$ days?
-Call $Q$ the cumulative reads over the last $T$ days.
-Then
-\begin{align}
-E [ Q(t) ] 
-  &= s B \mathcal M \int_{t-T}{t} i(u) \; du
-\\&= s B \mathcal M i(t) \frac{1}{r} \left[1 - e^{-r T} \right].
-\end{align}
-Setting $T = t$ corresponds to all reads since time $0$; in that case, we have that $E [ Q(t) ]$ equals $s B \mathcal M$ times the cumulative infection hours, or approximately
-\begin{align}
-E [ Q(t) ] 
-  &\approx s B \mathcal M \frac{i(t)}{r}
-  \\&\approx s B \mathcal M \frac{c(t)}{b}
-\end{align}
-Considering the factor $1 - e^{-rT}$ indicates that it is only the samples from the past few characteristic growth periods that contributes significantly to the total reads.
-
-How much better do we do, detection wise, when we only require cumulative reads to reach $M^*$?
-Detection now occurs at $E[Q(t)] = M^*$ or
-\begin{align}
-  i(t^*) &= \frac{r M^*}{s B \mathcal M} \\
-  c(t^*) &= b \cdot \frac{M^*}{s B \mathcal M};
-\end{align}
-these are both a factor $r$ greater than before.
-As expected, the effect on time is only logarithmic,
-\begin{align}
-  t^* = \frac{1}{r} \log \frac{r M^*}{i_0 s B \mathcal M}.
-\end{align}
-The effect overall is as if we increased any of $\mathcal M$, $s$, or $B$ by a factor of $1/r$.
-
-## Observations
-
-#### MGS monitoring performance is independent of WWTP catchment size and flow rate at large numbers
-
-This would be very useful to know if true, since it would allow us to use estimates from a variety of WWTPs or other WW monitoring locations interchangeably.
-
-# Connecting to empirical data
-
-## SARS2 in @rothman2021rnav
-
-(not carefully checked).
-
-Jeff estimates [here](https://docs.google.com/document/d/1XVeLyc1Peh59mILGtie8bB2eC7Mke7Byq77tiqs7Ih8/edit#heading=h.dshnx0efqzl4) that the proportion of SARS2 reads in a sample in the @rothman2021rnav data is 3e-7 when 1e-3 of the catchment is infected.
-That corresponds to $P = 3\cdot 10^{-7}$ when $i = 10^{-3}$, so that $sB = P(t) / i(t) = 3 \cdot 10^{-4} \approx 10^{-3.5}$.
-We would therefore need to sequence a single sample to a depth of $10^{8.5}$ fragments to see 10 fragments of SARS2 when $i = 10^{-4}$ of the population is infected.
-
-Consider how many reads we'd need to sequence to see an individual 40-mer in the SARS2 genome 10 times when $i = 10^{-4}$, for 1x150bp sequencing.
-Roughly $10^{-2.5}$ of SARS2 reads will cover the 40-mer ($(150 - 40 + 1) / 30000$).
-Therefore we need to sequence $10^{10}$ reads.
+## Transportation time
 
 ## Effective number of shedders contributing to a WWTP sample
+
+## Non-human contributions to WWTP samples
+
+Above, I assume that the WWTP samples are made up entirely from human microbiome shedding.
+But there may be other contributions to the sample, including 
+
+- contributions of microbial and non-microbial NA from other sources, such as pets, livestock, or wildlife, flushed or carried in by runoff or stormwater
+- growth in the sewer system (including in the primary clarifier, for settled solids)
+
+TODO: consider whether it is plausible that these contribute a signficant relative abundance of MGS reads.
+For growth in the sewers, review a recent college campus study that suggested this was a significant facter in campus samples at the start of the school year, when the system had been in low use.
+Can also look for literature on microbial dynamics in clarifiers, and talk to the scientists who study this stuff, for the case of settled solids.
+
+## Noise/variability in the model
+
+There is noise or randomness injected from many sources including transmission, shedding, sample processing, and sequencing. 
+My working hypothesis is that variability for basic detection in the WWTP setting is negligible because we’ll be detecting the epidemic at a sufficiently late point in time in a sufficiently large catchment that the random effects will largely average out in predictions of the point when detection occurs.
+It will be important to assess the relevant parameters and see if/when we are likely in a regime where this hypothesis holds.
