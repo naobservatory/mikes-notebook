@@ -1,0 +1,263 @@
+---
+title: "Review the 2023-04 stock quantification experiment"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: show
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+```
+
+Experiment described in Drive [here](https://docs.google.com/document/d/1ROet-8tF_u_W76AVOWFiuSOcYkms40BrgKR8f7iBBBU)
+
+
+## Quant-iT data
+
+Note that the file extension indicates a CSV file, but the file is not a properly formulated tabular file.
+So our first task is to parse the data in this file.
+In addition, there are different sets of data in this file, which we will need to understand and document.
+
+It will also be helfpul to plot a plate-based view of the florescence values to compare to our expected plate layout.
+We'll also want to import the info for each well, to link to the data
+
+
+```{r}
+fn <- here('_data/nao/2023-04-24-stock-quantification/QuantIt Protocol_230425_1137.csv')
+
+data_raw <- read_lines(fn)
+data_raw %>% head(20)
+```
+
+The data starts with a header, which ends with a line 'End_of_header', adn then has multiple blocks of data delimited by blank lines.
+Each block of data starts with three lines giving values for Chromatic, Intervla, and Time variables, and then gives the values for each well.
+The values for the well are in the format `[Well id]:\t[Value]`.
+
+Our process for importing the data might look like:
+
+#. Split the data into blocks based on empty lines; the first block contains the header/metadata.
+#. Save and (optionally) process the block of header data for useful metadata
+#. Apply a parsing function to the main data blocks to return a single data frame
+
+Let's work within a tibble,
+
+```{r}
+data_raw_tbl <- tibble(raw = data_raw)
+```
+
+First, I'll collapse the different data blocks into separate data frames,
+
+```{r}
+data_nest <- data_raw_tbl %>%
+  mutate(
+    is_blank = nchar(raw) == 0L,
+    block = cumsum(is_blank)
+  ) %>%
+  filter(!is_blank) %>%
+  select(-is_blank) %>%
+  group_by(block) %>%
+  nest()
+```
+
+I'll save the header information in a separate data frame in case we wish to pull any info from this later on.
+
+```{r}
+header <- data_nest %>% filter(block == 0) %>% pull(data) %>% .[[1]]
+```
+
+Next, I'll define a function to import a data block,
+
+```{r}
+import_block <- function(x) {
+  # metadata is contained in the first three columns, in the format
+  # 'Chromatic: 1'
+  meta <- x %>% 
+    slice_head(n = 3) %>% 
+    separate(col = raw, into = c('name', 'value'), sep = ": ") %>%
+    pivot_wider() %>%
+    janitor::clean_names()
+  # main data follows, in the format "A01:\t151015.0000"
+  main <- x %>% 
+    slice_tail(n = -3) %>% 
+    separate(col = raw, into = c('well', 'value'), sep = ":\t") %>%
+    mutate(across(value, as.numeric))
+  crossing(meta, main)
+}
+
+test_block <- data_nest %>% filter(block == 1) %>% pull(data) %>% .[[1]]
+
+import_block(test_block)
+```
+
+Process all data blocks into one data frame,
+
+```{r}
+data_proc <- data_nest %>% 
+  filter(block != 0) %>%
+  mutate(data = map(data, import_block)) %>%
+  unnest(data) %>%
+  separate(well, into = c('row', 'column'), sep = 1, remove = FALSE) %>%
+  ungroup %>%
+  mutate(
+    across(chromatic, ~fct_inseq(.x, ordered = TRUE)),
+    # for column, coerce to integer first to remove leading zeros
+    across(column, ~as.integer(.x) %>% ordered),
+    across(row, ordered, levels = LETTERS[1:8]),
+  )
+```
+
+
+## TODO: Combine the sample meta
+
+
+```{r}
+ss <- 'https://docs.google.com/spreadsheets/d/1HXdFckwlqdy4NQ0NSfUcB9_nN-n3xPJH2fAsK9Mi-Uc'
+
+meta <- googlesheets4::read_sheet(ss, sheet = 2, na = 'NA') %>% glimpse
+```
+
+```{r}
+data_proc <- data_proc %>%
+  left_join(meta, by = 'well')
+```
+
+# Visualize
+
+## Plate format
+
+Visualize the first chromatic
+
+```{r, fig.dim = c(8, 6)}
+data_proc %>%
+  filter(chromatic == 1) %>%
+  mutate(
+    # Reverse the row order so that the plate is oriented correctly in the plot
+    across(row, fct_rev)
+  ) %>%
+  ggplot(aes(y = row, x = column, fill = log10(value))) +
+  coord_fixed() +
+  geom_tile() +
+  geom_text(aes(label = log10(value) %>% round(1)), size = 5, color = 'white') +
+  # scale_fill_brewer(type = "qual", palette = 2) + 
+  labs(title = "Plate layout") +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+## Data from different chromatics
+
+```{r, fig.dim = c(6, 7.5)}
+data_proc %>%
+  filter(column %in% c(1, 2, 3, 4)) %>%
+  ggplot(aes(x = value, y = well, color = chromatic)) +
+  scale_x_log10() +
+  geom_point()
+```
+
+Check for the standard curve
+
+```{r, fig.dim = c(6, 7)}
+p1 <- data_proc %>%
+  filter(type == 'standard') %>%
+  ggplot(aes(x = conc_ari, y = value, color = chromatic)) +
+  geom_point()
+p2 <- p1 +
+  scale_x_log10() +
+  scale_y_log10()
+p1 / p2
+```
+
+Now let's look at the SC for each chromatic, with the (geometric) mean value of the target sample marked.
+
+```{r}
+mean_gm <- function(x) {
+  x %>% log %>% mean %>% exp
+}
+
+target_mean <- data_proc %>%
+  filter(type == 'target') %>%
+  summarize(.by = chromatic,
+    across(value, mean_gm)
+  )
+target_mean %>% 
+  knitr::kable(digits = 0, title = 'Gm. mean of target sample') %>%
+  kableExtra::kable_styling(full_width = FALSE)
+```
+
+```{r, fig.dim = c(6, 6) * 1.2}
+data_proc %>%
+  filter(type == 'standard') %>%
+  ggplot(aes(x = conc_ari, y = value, color = chromatic)) +
+  facet_wrap(~chromatic) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_hline(data = target_mean, aes(yintercept = value), linetype = 3) +
+  geom_point()
+```
+
+Note, I have not estimated and subtracted the background; possibly should, but want to understand why this is needed/suggested.
+From these plots, it does seem like there is a non-linear relationship between the concentration and the flourescence signal.
+We should not see this if the signal was `RFU = background + slope * concentration`.
+Simply subtracting the value of the blank from each sample will not fix this issue.
+
+For each chromatic, the mean florescence value for the target sample appears in the non-linear part of the standard curve.
+To me, this suggests that the SC seen here may not be appropriate for a target sample in this range.
+The target sample was diluted 50-fold; but if it were not diluted, it would be in a good part of the SC.
+
+# Analysis
+
+## Standard curve
+
+The assay manual shows using a linear fit of non-transformed values.
+Is this appropriate?
+
+```{r}
+
+```
+
+# Discussion
+
+TODO Question - what are the other chromatics?
+
+TODO Baseline subtraction
+
+TODO Standard curve estimation
+
+TODO Power analysis - value of replicates for the SC and the target (?)
