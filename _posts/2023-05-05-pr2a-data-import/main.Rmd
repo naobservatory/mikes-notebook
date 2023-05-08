@@ -1,0 +1,621 @@
+---
+title: "Import P2RA data"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+library(speedyseq)
+
+library(furrr)
+plan(multisession, workers = 3)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+today <- format(Sys.time(), '%Y-%m-%d')
+```
+
+Test data downloaded with the following command from within `_data/nao-mgs`,
+
+```sh
+s3cmd get --recursive s3://nao-mgs/PRJNA645711/cladecounts/ PRJNA645711/cladecounts/
+```
+
+# Test import
+
+## Import Kraken counts
+
+### Test import a single study
+
+We can either call `read_tsv` on individual files, or pass all filenames in at once (new readr feature)
+
+```{r, eval = FALSE}
+test_dir <- here('_data/nao/nao-mgs', 'PRJNA645711', 'cladecounts')
+fns <- test_dir %>%
+  dir_ls(glob = '*.tsv.gz')
+
+# read_kraken_report <- function(file) {
+#   cns <- c('taxid', 'direct_maps', 'direct_hits', 'clade_maps', 'clade_hits')
+#   cts <- 'idddd'
+#   read_tsv(file, col_names = cns, col_types = cts)
+# }
+#
+# x <- tibble(file = fns) %>%
+#   mutate(
+#     sample = file %>% path_file %>% str_extract('^[^\\.]+'),
+#     results = map(file, ~read_kraken_report(.x))
+#   ) %>%
+#   unnest(results) %>%
+#   select(-file) %>%
+#   glimpse
+
+read_kraken_reports <- function(file) {
+  cns <- c('taxid', 'direct_maps', 'direct_hits', 'clade_maps', 'clade_hits')
+  cts <- 'idddd'
+  read_tsv(file, col_names = cns, col_types = cts, id = 'file')
+}
+
+# Read all results in long format
+kraken_results <- read_kraken_reports(fns) %>%
+  mutate(
+    sample = file %>% path_file %>% str_extract('^[^\\.]+'),
+  ) %>%
+  select(-file) %>%
+  glimpse
+
+# Create an OTU table with the clade maps,
+kraken_otu <- kraken_results %>%
+  select(sample, taxid, clade_maps) %>%
+  pivot_wider(names_from = sample, values_from = clade_maps, 
+              values_fill = 0) %>%
+  otu_table(taxa_are_rows = TRUE)
+```
+
+Might want to be careful with using the numerical taxids as the taxon names, due to possible phyloseq bugs when identifiers are valid numerics.
+
+### all studies
+
+Passing all files into one `read_tsv` call fails; I suspect that asking readr to read this many files at once is hitting some sort of memory limitation.
+
+```{r, eval = FALSE}
+data_dir <- here('_data/nao/nao-mgs')
+# fns1 <- dir_ls(data_dir, recurse = TRUE, 
+#               regexp = '/cladecounts/.+\\.tsv\\.gz$')
+# fns2 <- dir_ls(data_dir, type = 'dir') %>%
+#   dir_ls(regexp = 'cladecounts$') %>%
+#   dir_ls(regexp = '/cladecounts/.+\\.tsv\\.gz$')
+# all.equal(fns1, fns1)
+fns <- dir_ls(data_dir, type = 'dir') %>%
+  dir_ls(regexp = 'cladecounts$') %>%
+  dir_ls(regexp = '/cladecounts/.+\\.tsv\\.gz$')
+
+read_kraken_reports <- function(file) {
+  cns <- c('taxid', 'direct_maps', 'direct_hits', 'clade_maps', 'clade_hits')
+  cts <- 'idddd'
+  read_tsv(file, col_names = cns, col_types = cts, id = 'file')
+}
+
+# Read all results in long format
+kraken_results <- read_kraken_reports(fns) %>%
+  mutate(
+    sample = file %>% path_file %>% str_extract('^[^\\.]+'),
+  ) %>%
+  select(-file) %>%
+  glimpse
+
+# save in project output directory
+dir_create('_output')
+saveRDS(kraken_results, str_glue('_output/{today}-kraken-results.rds'))
+```
+
+Can instead read in indivual files,
+
+```{r, eval = FALSE}
+data_dir <- here('_data/nao/nao-mgs')
+fns <- dir_ls(data_dir, type = 'dir') %>%
+  dir_ls(regexp = 'cladecounts$') %>%
+  dir_ls(regexp = '/cladecounts/.+\\.tsv\\.gz$')
+
+read_kraken_report <- function(file) {
+  cns <- c('taxid', 'direct_maps', 'direct_hits', 'clade_maps', 'clade_hits')
+  cts <- 'idddd'
+  read_tsv(file, col_names = cns, col_types = cts)
+}
+
+# Read all results in long format
+kraken_results <- tibble(file = fns) %>%
+  mutate(
+    sample = file %>% path_file %>% str_extract('^[^\\.]+'),
+    results = future_map(file, ~read_kraken_report(.x))
+  ) %>%
+  unnest(results) %>%
+  select(-file) %>%
+  glimpse
+
+# save in project output directory
+dir_create('_output')
+saveRDS(kraken_results, str_glue('_output/{today}-kraken-results.rds'))
+```
+
+New info from talking to Jeff: 
+
+0 = unassigned read(pairs), not a valid taxid
+1 = root
+
+Note, due to a quasi-bug in the current clade-counts pipeline, the unassigned (0) category includes some low-quality reads that were split from their pair, and henceg
+
+TODO
+
+- Consider different otu names
+- ? Save as matrix rather than phyloseq object
+- Consider saving otu table in sparse format
+- Import all files with the same read_tsv command, by passing in a named file list, and using the id argument
+- make taxid a character
+
+```{r}
+# otu <- readRDS(str_glue('_output/2023-05-08-kraken-otu-table.rds'))
+```
+
+todo: 
+
+- delete old saved output
+
+
+```{r}
+kraken_results <- readRDS(str_glue('_output/2023-05-10-kraken-results.rds'))
+# Create an OTU table with the clade maps,
+kraken_otu <- kraken_results %>%
+  select(sample, taxid, clade_maps) %>%
+  pivot_wider(names_from = sample, values_from = clade_maps, 
+              values_fill = 0) %>%
+  otu_table(taxa_are_rows = TRUE)
+# save in project output directory
+# saveRDS(kraken_otu, str_glue('_output/{today}-kraken-otu-table.rds'))
+```
+
+
+## Import taxon metadata
+
+Goal: Obtain the full taxonomy for each taxonomic feature
+
+```{r}
+taxdump_dir <- here('_data/ncbi', 'taxdmp_2022-12-01')
+
+cns <- c('tax_id', 'parent tax_id', 'rank', 'embl code', 'division id',
+         'inherited div flag', 'genetic code id', 'inherited GC  flag',
+         'mitochondrial genetic code id', 'inherited MGC flag',
+         'GenBank hidden flag', 'hidden subtree root flag', 'comments')
+
+nodes <- path(taxdump_dir, 'nodes.dmp.gz') %>% 
+  read_delim(delim = '|', trim_ws = TRUE, col_names = cns, 
+             col_types = 'ccc',
+             num_threads = 3, col_select = 1:3) %>%
+  janitor::clean_names() %>%
+  glimpse
+# The nodes for just the taxa in the kraken otu table
+nodes_filt <- nodes %>% filter(tax_id %in% taxa_names(kraken_otu))
+
+cns <- c('tax_id', 'name_txt', 'unique name', 'name class', 'dummy')
+nms <- path(taxdump_dir, 'names.dmp.gz') %>% 
+  read_delim(delim = '|', trim_ws = TRUE, col_names = cns,
+             col_types = 'ccccc',
+             num_threads = 3, col_select = -dummy) %>%
+  janitor::clean_names() %>%
+  glimpse
+
+```
+
+```{r}
+nodes_filt %>% count(rank) %>% arrange(desc(n))
+```
+
+Discuss with comp team whether it makes sense to be assigning to various non-standard nodes.
+
+
+The following allows us to get a path for a taxid,
+
+```{r}
+parents <- nodes_filt %>% 
+  select(tax_id, parent_tax_id) %>% 
+  deframe 
+# parents <- nodes_filt %>% select(tax_id, parent_tax_id) %>% deframe 
+
+get_path <- function(taxid, parents) {
+  stopifnot(taxid %in% names(parents))
+
+  taxids <- character()
+
+  # parents[1] == 1 is the root, so can loop until the parent is the taxid itself
+  while ((parents[taxid] != taxid)) {
+    taxids <- c(taxids, taxid)
+    taxid <- parents[taxid]
+  }
+  taxids %>% unname
+}
+
+p <- get_path('1718', parents = parents) %>% print
+```
+
+
+```{r}
+all_paths <- tibble(tax_id = setdiff(taxa_names(kraken_otu), '0')) %>%
+  # slice_head(n = 100) %>%
+  mutate(path = future_map(tax_id, get_path, parents = parents))
+```
+
+This works fine to get the paths; next, add the ranks and names, and make the matrix we want.
+
+Let's get the 'scientific name' of every taxid, checking that all taxids have one.
+
+```{r}
+nms_sci <- nms %>% 
+  filter(name_class == 'scientific name') %>%
+  select(tax_id, name = name_txt)
+
+stopifnot(setequal(nms$tax_id, nms_sci$tax_id))
+stopifnot(!anyNA(nms_sci$name))
+```
+
+```{r}
+all_paths_nm <- all_paths %>%
+  unnest(path) %>%
+  left_join(nodes %>% select(tax_id, rank), by = c('path' = 'tax_id')) %>%
+  left_join(nms_sci, by = c('path' = 'tax_id')) %>%
+  glimpse
+stopifnot(!(ps_nm %>% pull(name) %>% anyNA))
+stopifnot(identical(sum(ps_nm$name == ''), 0L))
+all_paths_nm %>% count(rank)
+```
+
+Subset to the standard ranks and create a taxonomy table in wide format
+
+```{r}
+rnks <- c('superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species')
+all_paths_nm_wide <- all_paths_nm %>%
+  filter(rank %in% rnks) %>%
+  mutate(across(rank, ~ factor(.x, levels = rnks))) %>%
+  select(tax_id, rank, name) %>%
+  pivot_wider(names_from = rank, values_from = name)
+```
+
+We'll need the ability to subset to a specific rank reliably. 
+Let's record the rank of each taxid in the OTU table,
+
+```{r}
+taxid_info <- nms_sci %>%
+  right_join(nodes_filt, by = 'tax_id')
+```
+
+
+### appendix: debugging  parsing
+
+These initial approaches each basically seems to work but gave problems on a small subset of rows,
+
+```{r}
+cns <- c('tax_id', 'name_txt', 'unique name', 'name class')
+nms <- path(taxdump_dir, 'names.dmp.gz') %>% 
+  read_delim(delim = '\t|\t', trim_ws = FALSE, col_names = cns,
+  num_threads = 3) %>%
+  glimpse
+problems(nms)
+
+nms <- path(taxdump_dir, 'names.dmp.gz') %>% 
+  read_delim(delim = '\t|', trim_ws = TRUE, col_names = cns,
+  num_threads = 3) %>%
+  glimpse
+problems(nms)
+```
+
+This is the one that worked with no problems:
+
+```{r, eval = F}
+cns <- c('tax_id', 'name_txt', 'unique name', 'name class', 'dummy')
+nms <- path(taxdump_dir, 'names.dmp.gz') %>% 
+  read_delim(delim = '|', trim_ws = TRUE, col_names = cns,
+  num_threads = 3, col_select = -dummy) %>%
+  glimpse
+problems(nms)
+```
+
+data.table::fread only allows single-char separators.
+It's white-space stripping feature doesn't apply to strings, leaving lots of extra tabs when we split on the pipe char.
+
+```{r, eval = F}
+cns <- c('tax_id', 'name_txt', 'unique name', 'name class', 'dummy')
+nms <- path(taxdump_dir, 'names.dmp.gz') %>% 
+  data.table::fread(sep = '|', col.names = cns)
+problems(nms)
+```
+
+
+might talk to Jeff about the parsing issues I'm having with the parsing
+
+
+### testing
+
+Now let's create a tree from the NCBI taxonomy node relationships stored in `nodes`,
+
+Some example code from the [treedata book](https://yulab-smu.top/treedata-book/chapter2.html) shows the basic mechanics,
+
+```{r, eval = FALSE}
+library(ape)
+library(tidytree)
+
+set.seed(2017)
+tree <- rtree(4)
+tree
+
+x <- as_tibble(tree)
+x
+class(x)
+as.phylo(x)
+
+paths <- ape::nodepath(tree) 
+```
+
+
+
+
+```{r}
+library(ape)
+library(tidytree)
+
+tbt <- nodes %>%
+  # Remove tips that don't appear in our data
+  filter(tax_id %in% taxa_names(otu)) %>%
+  transmute(
+    parent = parent_tax_id,
+    node = tax_id, 
+    branch.length = NA, 
+    label = tax_id, 
+    rank
+  )
+class(tbt) <- c('tbl_tree', class(tbt))
+tree <- tbt %>% tidytree::as.phylo()
+td <- tbt %>% tidytree::as.treedata()
+```
+
+
+```{r, eval = F}
+# Trying to prune the full tree caused a segfault, presumably the tree is too big
+useless_tips <- setdiff(tree$tip.label, taxa_names(otu))
+tree_pruned <- drop.tip(tree, useless_tips)
+```
+
+```{r, eval = F}
+paths <- ape::nodepath(tree) 
+```
+
+
+```{r, eval = FALSE}
+# Fails
+traversal <- castor::get_tree_traversal_root_to_tips(tree, include_tips = TRUE)
+```
+
+
+
+
+## Import sample metadata for all bioprojects
+
+Metadata of papers (publications) for various datasets, which includes a list of bioprojects associated with papers.
+To join with the bioproject metadata, I'll flatten to one row per bioproject.
+
+```{r}
+papers_df <- here('_data/nao/mgs-pipeline/dashboard/metadata_papers.json') %>%
+  jsonlite::read_json() %>%
+  enframe('paper', 'metadata') %>% 
+  unnest_wider(metadata) %>%
+  glimpse
+
+bioprojects_to_papers <- papers_df %>%
+  unnest(projects) %>%
+  # call a second time to coerce to character
+  unnest(projects) %>%
+  rename(bioproject = projects) %>%
+  rename_with(~str_c('paper_', .x), -c(paper, bioproject)) %>%
+  glimpse
+```
+
+Metadata linking bioprojects to samples.
+The dashboard metadata has a list of samples for each bioproject, which I'll flatten into a data frame where each row correponds to a sample.
+
+```{r}
+bioproject_df <- here('_data/nao/mgs-pipeline/dashboard/metadata_bioprojects.json') %>%
+  jsonlite::read_json() %>%
+  enframe('bioproject', 'sample') %>% 
+  unnest(sample) %>%
+  # call a second time to coerce to character
+  unnest(sample) %>%
+  left_join(bioprojects_to_papers, by = 'bioproject') %>%
+  glimpse
+```
+
+Metadata associated with individual samples.
+Does not have bioprojects, so we'll add those in.
+
+```{r}
+sam_df <- here('_data/nao/mgs-pipeline/dashboard/metadata_samples.json') %>%
+  jsonlite::read_json() %>%
+  enframe('sample', 'metadata') %>% 
+  unnest_wider(metadata) %>%
+  rename(reads_dash = reads) %>%
+  left_join(bioproject_df, by = 'sample') %>%
+  glimpse
+```
+
+Note, here 'reads' is the number of read pairs (i.e. the number of sequenced fragments or inserts); it is the raw number before any processing.
+
+### Assigned and unassigned reads
+
+From the kraken results, we should be able to get the total number of assigned and unassigned reads and/or hits.
+
+```{r}
+assigned <- kraken_results %>% filter(taxid %in% c(0,1)) %>%
+  mutate(
+    across(taxid, as.character),
+    taxid = fct_recode(taxid, unassigned = '0', assigned = '1')
+  ) %>%
+  pivot_longer(starts_with(c('direct', 'clade'))) %>%
+  pivot_wider(names_from = taxid) %>%
+  mutate(total = unassigned + assigned)
+```
+
+Testing to understand output,
+
+```{r, eval = F}
+x <- assigned %>%
+  left_join(sam_df %>% select(sample, reads_dash), 
+            by = 'sample') %>%
+  mutate(diff = reads_dash - total)
+x %>%
+  slice(1:50) %>%
+  print(n=Inf)
+```
+
+Note that currently the unassigned category for clade maps doesn't always make sense, due to the above-noted bug where low quality read pairs are split and counted, and generally end up as unassigned, which can lead to the total count of categories 0 and 1 being larger than the total number of read pairs.
+
+For now, we will avoid using the 0 category.
+
+### Add to sample data
+
+```{r}
+assigned_sam <- assigned %>%
+  filter(name == 'clade_maps') %>%
+  select(sample, assigned) %>%
+  rename_with(~str_c('reads_', .x), -sample)
+sam_df_mod <- sam_df %>%
+  left_join(assigned_sam, by = 'sample')
+```
+
+## join in phyloseq object
+
+NOTE, tax table doesn't have 0 and 1, so these will be dropped
+
+```{r}
+stopifnot(setequal(sam_df_mod$sample, kraken_otu %>% sample_names))
+# TODO: check tax names also
+ps <- phyloseq(
+  kraken_otu,
+  sample_data(sam_df_mod), 
+  tax_table(all_paths_nm_wide)
+)
+```
+
+It would be handy to record the rank for each taxon so that we can select on that.
+There is currently no way to store additional taxon metadata outside of the taxon names and the tax table.
+We can therefore either add a final column to the tax table or adjust the taxon names (or both).
+For now I'll adjust the taxon names,
+
+
+```{r}
+species <- 
+
+ps_species <- 
+```
+
+
+# checks
+
+
+
+### check fraction assigned reads
+
+```{r}
+sam_df_mod %>%
+  mutate(frac_assigned = reads_assigned / reads_dash) %>%
+  ggplot(aes(y = paper, x = frac_assigned, color = na_type)) +
+  # facet_wrap(~paper, scales = 'free_y') +
+  # geom_boxplot() +
+  geom_quasirandom(groupOnX = FALSE)
+```
+
+Note that the NA type for samples is not set for any studies except for Brumfield, but it is set for some papers.
+
+```{r}
+sam_df_mod %>%
+  mutate(frac_assigned = reads_assigned / reads_dash) %>%
+  ggplot(aes(y = paper, x = frac_assigned, color = paper_na_type)) +
+  # facet_wrap(~paper, scales = 'free_y') +
+  # geom_boxplot() +
+  geom_quasirandom(groupOnX = FALSE)
+```
+
+Hence we could infer it for all samples from the paper,
+
+```{r}
+ps_mod <- ps %>%
+  mutate_sample_data(
+    na_type = case_when(
+      is.na(na_type) ~ paper_na_type,
+      TRUE ~ na_type
+    )
+  )
+```
+
+### Fraction of reads by superkingdom
+
+```{r}
+superkingdom_taxids <- taxid_info %>%
+  filter(rank == 'superkingdom') %>%
+  pull(tax_id)
+With
+```
+
+```{r}
+x <- ps_mod %>%
+  filter_tax_table(.otu %in% superkingdom_taxids) %>%
+  as_tibble %>%
+  mutate(.by = .sample,
+    proportion = .abundance %>% {. / sum(.)}
+  )
+```
+
+HERE.
+
+```{r}
+x %>% 
+  ggplot(aes(.sample, proportion, fill = superkingdom)) +
+  facet_wrap(~paper, scales = 'free_x') +
+  geom_col()
+```
+
+
+# Notes
+
+TODO: Get more metadata on the taxa, including RNA vs DNA
