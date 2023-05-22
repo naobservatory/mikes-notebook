@@ -18,5 +18,5 @@
 # exists but the corresponding cladecounts directory does not, but continue on
 # to the next project.
 for bioproject in $(aws s3 ls s3://nao-mgs/ | awk '{print $NF}') ; do
-  aws s3 sync s3://nao-mgs/${bioproject}cladecounts ${bioproject}cladecounts
+  aws s3 sync --exact-timestamps s3://nao-mgs/${bioproject}cladecounts ${bioproject}cladecounts
 done
