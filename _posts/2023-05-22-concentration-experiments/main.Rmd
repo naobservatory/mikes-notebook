@@ -1,0 +1,194 @@
+---
+title: "Concentration tests"
+description: |
+  Tests of wastewater concentration methods performed by Ari in May 2023.
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+
+library(furrr)
+plan(multisession, workers = 3)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+today <- format(Sys.time(), '%Y-%m-%d')
+```
+
+# Import data
+
+## Tests 1 and 2
+
+```{r}
+sheet_url <- 'https://docs.google.com/spreadsheets/d/1hRsWlFYTywcZvYOLiidpFj7ywYbag2YJ8oVDO5MTRFs'
+
+test1_raw <- googlesheets4::read_sheet(sheet_url, 'Test 1',
+  col_types = 'iccc')
+test2_raw <- googlesheets4::read_sheet(sheet_url, 'Test 2',
+  col_types = 'icc') %>%
+  glimpse
+```
+
+Let's format these results in tidy format by pivoting the treatments (from columns to rows) and splitting the replicate measurements into their own rows.
+
+```{r}
+parse_values <- function(x) {
+  x %>% 
+    str_split(' & ') %>%
+    map(~set_names(., nm = seq_along(.)))
+}
+# parse_values('123 & 523')
+format_results <- function(x) {
+  x %>%
+    rename(round = Round) %>%
+    pivot_longer(-round, names_to = 'treatment') %>%
+    mutate(
+      across(value, parse_values),
+      replicate_id = map(value, names)
+    ) %>%
+    unnest(c(replicate_id, value)) %>%
+    rename(volume = value) %>%
+    mutate(
+      across(volume, as.numeric)
+    )
+}
+test1 <- test1_raw %>% format_results %>% glimpse
+test2 <- test2_raw %>% format_results %>% glimpse
+```
+
+
+## Test 3
+
+The results for this test follow a different format.
+
+```{r}
+sheet_url <- 'https://docs.google.com/spreadsheets/d/1ChpXwS0azsDmoeHfyPYLBD158bHq7op-ld2EeukE_5g'
+
+test3_samples_raw <- googlesheets4::read_sheet(sheet_url, 'Samples', col_types = 'cccccc')
+test3_rounds_raw <- googlesheets4::read_sheet(sheet_url, 'Centrifugal filtration rounds', col_types = 'in')
+test3_results_raw <- googlesheets4::read_sheet(sheet_url, 'Results', col_types = 'icn')
+```
+
+TODO: Improve
+
+```{r}
+test3_samples <- test3_samples_raw %>%
+  janitor::clean_names() %>%
+  rename(
+    filter_size = filter_size_k_da
+  ) %>%
+  mutate(
+    across(c(treatment_group_id, filter_size), factor),
+  ) %>%
+  glimpse
+
+# test3_rounds_raw
+test3_results <- test3_results_raw %>%
+  janitor::clean_names() %>%
+  rename(
+    retentate_volume = retentate_volume_u_l
+  ) %>%
+  glimpse
+
+test3 <- test3_results %>%
+  left_join(test3_samples, by = 'sample_id') %>%
+  mutate(
+    # treatment = str_glue('{reagent}:{filter_type}:{filter_size}'),
+    # treatment = str_c(reagant, filter_type, filter_size, sep = ':'),
+  ) %>%
+  glimpse
+```
+
+
+
+# Plots
+
+```{r test 1, fig.dim = c(4, 4)*1.5}
+test1 %>%
+  mutate(across(round, as.ordered)) %>%
+  ggplot(aes(y = round, x = volume, color = replicate_id)) +
+  theme_minimal_hgrid() +
+  theme(legend.position = 'bottom') +
+  scale_color_manual(values = colors_oi[2:3] %>% unname) +
+  expand_limits(x = 0) +
+  facet_wrap(~treatment, ncol = 1) +
+  labs(x = 'Volume (uL)', y = 'Round', color = 'Replicate') +
+  plot_annotation('Test 1') +
+  geom_vline(xintercept = 150, color = 'grey') +
+  geom_quasirandom(groupOnX = FALSE)
+```
+
+```{r test 2, fig.dim = c(4, 3)*1.5}
+test2 %>%
+  mutate(across(round, as.ordered)) %>%
+  ggplot(aes(y = round, x = volume, color = replicate_id)) +
+  theme_minimal_hgrid() +
+  theme(legend.position = 'bottom') +
+  scale_color_manual(values = colors_oi[2:3] %>% unname) +
+  expand_limits(x = 0) +
+  facet_wrap(~treatment, ncol = 1) +
+  labs(x = 'Volume (uL)', y = 'Round', color = 'Replicate') +
+  plot_annotation('Test 2') +
+  geom_vline(xintercept = 150, color = 'grey') +
+  geom_quasirandom(groupOnX = FALSE)
+```
+
+```{r test 3, fig.dim = c(4, 6)*1.5}
+test3 %>%
+  mutate(
+         across(round, as.ordered),
+         across(c(filter_size, reagent), as.factor)
+         ) %>%
+  ggplot(aes(y = round, x = retentate_volume)) +
+  theme_minimal_hgrid() +
+  theme(legend.position = 'bottom') +
+  scale_color_manual(values = colors_oi[2:3] %>% unname) +
+  expand_limits(x = 0) +
+  facet_wrap(~ filter_size : reagent, ncol = 1) +
+  labs(x = 'Volume (uL)', y = 'Round', color = 'Replicate') +
+  plot_annotation('Test 3') +
+  geom_vline(xintercept = 150, color = 'grey') +
+  geom_quasirandom(groupOnX = FALSE)
+```
+
+TODO: standardsize col names
+
+- treatment
+- retentate vol
