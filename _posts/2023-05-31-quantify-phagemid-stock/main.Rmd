@@ -1,0 +1,388 @@
+---
+title: "Analyze phagemid qPCR data for creating spike-in stock"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - r
+  - qPCR
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+# Custon qPCR helpers
+source('_functions.R')
+```
+
+We are interested in using some old stocks of phagemid tracers as spike-in controls for an upcoming experiment.
+For that, we need an estimate of the tracer concentration in the stocks, in terms of Cq values and/or particle concentration.
+
+Ari did two qPCRs on 2023-05-31; see the [experiment folder in Drive](https://drive.google.com/drive/folders/1pFr5oC1rPs_Se7VRkQ4WL4Gc5AKjvI8w).
+
+# First qPCR run
+
+Store in local data file for now; could perhaps put in top level data directory.
+
+```{r, eval = T}
+url <- "https://docs.google.com/spreadsheets/d/1VV7B6m-gy-VqTVpi9feP0f-8QUd5ZLNR"
+dir_create('_data')
+data_file <- '_data/5-31 28 Test.xls'
+if (!file_exists(data_file)) {
+  googledrive::drive_download(url, path = data_file, overwrite = FALSE)
+}
+```
+
+Import and clean as in previous analyses,
+
+```{r}
+results <- data_file %>%
+  read_qpcr_results %>%
+    # Remove some unused columns
+  select(-c(omit, task, reporter, quencher, starts_with('quantity'),
+            y_intercept:efficiency, target_color)) %>%
+  glimpse
+```
+
+Check the threshold settings,
+
+```{r}
+results %>% count(automatic_ct_threshold, ct_threshold)
+ct_threshold = 0.2
+```
+
+Load the amplification data --- the relative florescence values (Rn and Delta Rn) --- and remove the unused wells (based on those with no sample name).
+
+For future reference, the line at which the data starts can vary between files; here it is 43, but in a previous experiment it was 40.
+
+```{r}
+amp <- data_file %>%
+  read_qpcr_amplification(start = 43, results = TRUE) %>%
+  # Remove some unused columns
+  select(-c(omit, task, reporter, quencher, starts_with('quantity'),
+            y_intercept:efficiency, target_color)) %>%
+  filter(!is.na(sample_name)) %>%
+  glimpse
+```
+
+And get the baseline coordinates for plotting,
+
+```{r}
+baselines <- results %>%
+  pivot_longer(
+    cols = c(baseline_start, baseline_end),
+    names_to = 'baseline_boundary',
+    values_to = 'cycle',
+    names_prefix = 'baseline_',
+  ) %>%
+  left_join(
+    amp %>% select(well_position, cycle, rn, delta_rn), 
+    by = c('well_position', 'cycle')
+  ) %>%
+  glimpse
+```
+
+```{r}
+results %>%
+  count(sample_name) %>%
+  arrange(desc(n)) %>% 
+  print(n = Inf)
+```
+
+## Plot the amplification curves
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+
+p1 <- amp %>%
+  filter(!is.na(target_name)) %>%
+  ggplot(aes(cycle, pmax(delta_rn, delta_rn_min), color = target_name)) +
+  geom_line(aes(group = well)) +
+  geom_hline(yintercept = ct_threshold, alpha = 0.3) +
+  scale_color_brewer(type = 'qual') +
+  geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+p2 <- p1 +
+  scale_y_log10()
+p1 / p2
+```
+
+Note the weird stuff going on with the blanks, particularly the one that appears to grow steadily. This may be an artefact of baseline subtraction, so let's look at the raw Rn.
+
+```{r, fig.dim = c(6,4)*1.5}
+p3 <- amp %>%
+  filter(!is.na(target_name)) %>%
+  ggplot(aes(cycle, rn, color = target_name)) +
+  geom_line(aes(group = well)) +
+  scale_color_brewer(type = 'qual') +
+  geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Rn', x = 'Cycle', color = 'Target')
+p4 <- p3 +
+  scale_y_log10()
+p4 / p2
+```
+
+Comparing Delta Rn to Rn shows that the blanks didn,t have amplication and the apparent growth is just an artefact of baseline subtraction, as I hypothesized.
+
+Note, the dRn trajectories of the target samples are already saturating at the threshold point.
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+
+p1 <- amp %>%
+  filter(target_name == '10', cycle <= 8) %>%
+  pivot_longer(c(rn, delta_rn)) %>%
+  ggplot(aes(cycle, value)) +
+  facet_wrap(~name, scales = 'free_y') +
+  geom_line(aes(group = well)) +
+  # geom_hline(yintercept = expected_ct_threshold, alpha = 0.3) +
+  scale_color_brewer(type = 'qual') +
+  scale_shape_manual(values = c(1, 4)) +
+  labs(y = '(Delta) Rn', x = 'Cycle')
+p2 <- p1 +
+  scale_y_log10()
+p1 / p2
+```
+
+I'm confused about why the rn curves aren't being affected by the log scaling; something seems to be off with the faceting and y-axis scaling interaction.
+
+I'm concerned that baseline subtraction may not be functioning properly given the high amount of phagemid that is present.
+
+
+The Ct mean as reported by the software is 4.599.
+
+
+# Second qPCR run
+
+Store in local data file for now; could perhaps put in top level data directory.
+
+```{r, eval = T}
+url <- "https://docs.google.com/spreadsheets/d/1NdmA43mYqXuHeu3E_QJJ40NijfXPVWwc"
+data_file <- '_data/5-31 28 Test 2.xls'
+if (!file_exists(data_file)) {
+  googledrive::drive_download(url, path = data_file, overwrite = FALSE)
+}
+```
+
+Import and clean as in previous analyses.
+Here, some sample names are numerical and indicate the dilution factor, so I'll parse those.
+
+```{r}
+results <- data_file %>%
+  read_qpcr_results %>%
+  # Remove some unused columns
+  select(-c(omit, task, reporter, quencher, starts_with('quantity'),
+            y_intercept:efficiency, target_color)) %>%
+  mutate(
+    dilution_factor = str_replace(sample_name, ',', '') %>% as.numeric,
+  ) %>%
+  glimpse
+```
+
+```{r}
+results %>%
+  count(sample_name, dilution_factor) %>%
+  arrange(desc(n)) %>% 
+  print(n = Inf)
+```
+
+Check the threshold settings,
+
+```{r}
+results %>% count(automatic_ct_threshold, ct_threshold)
+ct_threshold = 0.2
+```
+
+Check the well breakdown by sample name,
+
+
+Load the amplification data --- the relative florescence values (Rn and Delta Rn) --- and remove the unused wells (based on those with no sample name).
+
+For future reference, the line at which the data starts can vary between files; here it is 43, but in a previous experiment it was 40.
+
+```{r}
+amp <- data_file %>%
+  read_qpcr_amplification(start = 43, results = TRUE) %>%
+  # Remove some unused columns
+  select(-c(omit, task, reporter, quencher, starts_with('quantity'),
+            y_intercept:efficiency, target_color)) %>%
+  filter(!is.na(sample_name)) %>%
+  mutate(
+    dilution_factor = str_replace(sample_name, ',', '') %>% as.numeric,
+  ) %>%
+  glimpse
+```
+
+And get the baseline coordinates for plotting,
+
+```{r}
+baselines <- results %>%
+  pivot_longer(
+    cols = c(baseline_start, baseline_end),
+    names_to = 'baseline_boundary',
+    values_to = 'cycle',
+    names_prefix = 'baseline_',
+  ) %>%
+  left_join(
+    amp %>% select(well_position, cycle, rn, delta_rn), 
+    by = c('well_position', 'cycle')
+  ) %>%
+  glimpse
+```
+
+## Plot the amplification curves
+
+Plot with the baselines,
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+
+p1 <- amp %>%
+  filter(!is.na(target_name)) %>%
+  ggplot(aes(cycle, pmax(delta_rn, delta_rn_min), color = target_name)) +
+  geom_line(aes(group = well)) +
+  geom_hline(yintercept = ct_threshold, alpha = 0.3) +
+  scale_color_brewer(type = 'qual') +
+  geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+p2 <- p1 +
+  scale_y_log10()
+p1 / p2
+```
+
+## Examine the Ct values
+
+```{r}
+results %>%
+  mutate(rel_conc = 1 / dilution_factor) %>%
+  ggplot(aes(rel_conc, ct)) +
+  labs(x = 'Concentration relative to stock') +
+  scale_x_log10() +
+  stat_smooth(method = 'lm') +
+  geom_point()
+```
+
+Examine the linear fit,
+
+```{r}
+results1 <- results %>%
+  mutate(
+    rel_conc = 1 / dilution_factor,
+    rel_conc_log10 = log10(rel_conc),
+  )
+
+fit <- lm(ct ~ rel_conc_log10, data = results1)
+fit %>% summary
+```
+
+Estimate the efficiency,
+
+```{r}
+x <- fit %>% broom::tidy()
+slope <- coef(fit)['rel_conc_log10']
+efficiency_estimate <- 10^(-1/slope) - 1
+efficiency_estimate 
+```
+
+### Bayesian estimate of efficiency
+
+```{r}
+library(rstanarm)
+options(mc.cores = parallel::detectCores())
+
+library(ggdist)
+```
+
+```{r}
+stan_fit <- stan_glm(
+  ct ~ rel_conc_log10, 
+  data = results1,
+)
+stan_fit
+```
+
+Use the posterior samples of the slope param to get the posterior of the efficiency,
+
+```{r}
+slope_post <- rstan::extract(stan_fit$stanfit)$beta
+efficiency_post <- 10^(-1/slope_post) - 1
+```
+
+```{r}
+efficiency_post %>% median_hdci(.width = 0.9)
+```
+
+```{r}
+efficiency_post %>% qplot +
+  labs(x = 'Efficiency', y = 'Posterior density') +
+  geom_vline(xintercept = median(efficiency_post), color = 'darkred')
+```
+
+The median is slighty larger than 1 and a value of 1 or less is quite plausible.
+However, it would be useful to think about whether my concern with the undiluted sample above would tend to cause the efficiency estimate to increase or decrease.
+
+notes
+
+- Could consider a better prior on the slope using domain info.
+
+## Estimate the Ct for the experiment dilution factor
+
+In the actual experiment, we used a dilution factor of 20000 for the spike-in stock.
+Of this spike-in stock, 100 ul was added to each 40 mL sample (an additional 400-fold dilution), for a total dilution factor of 8e6 in the experiment samples relative to the initial stock.
+
+The sample processing added some concentration:
+On the order of 40 mL of sample was used (with little loss), and eluted into 80 uL, for a concentration factor of ~500.
+Hence the final elutant is only diluted by a factor of 1.6e4 relative to the initial stock.
+
+What are the corresponding Ct values?
+
+```{r}
+newdata <- tibble(
+  rel_conc_log10 = log10(1 / c(2e4, 8e6, 1.6e4))
+)
+predict(stan_fit, newdata = newdata)
+```
+
+Therefore we expect Ct values of around 18.6 for the spike-in stock, 27.1 for the spiked sample, and 18.2 for the extracted NA solution.
