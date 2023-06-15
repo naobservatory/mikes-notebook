@@ -1,0 +1,300 @@
+---
+title: "Reanalysis of Conceição-Neto et al 2015 protocol testing"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+  - MGS protocols
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: true
+---
+
+Data from @conceicaoneto2015modu
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+R setup
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+# library(speedyseq)
+# library(furrr)
+# plan(multisession, workers = 3)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+# today <- format(Sys.time(), '%Y-%m-%d')
+```
+
+
+# Data import
+
+Import the MGS read count data from Table S4 from the supplementary pdf file,
+
+```{r}
+# library(tabulizer)
+supplement_path <- '~/Zotero/storage/B867AJV4/Conceição-Neto et al. - 2015 - supplement.pdf'
+x <- tabulizer::extract_tables(supplement_path, pages = 4, method = 'lattice')
+x <- x[[1]]
+x[1,1] <- 'taxon'
+# x <- tabulizer::extract_areas(supplement_path, pages = 4)
+
+nms <- x[1,]
+x <- x %>%
+  tail(-1) %>%
+  head(-1) %>%
+  as_tibble()
+names(x) <- nms
+x
+x0 <- x
+# Parse
+x <- x0 %>%
+  pivot_longer(-taxon, names_to = 'sample') %>%
+  separate(value, into = c('reads', 'percent'), sep = '\\s+') %>%
+  mutate(
+    across(reads, as.numeric),
+    across(percent, ~str_extract(.x, '\\d+\\.\\d+')),
+    across(taxon, ~str_replace(.x, '\\r', ' ')),
+    taxon_type = case_when(
+      taxon == 'unmapped' ~ 'unmapped',
+      str_detect(taxon, 'virus') ~ 'virus',
+      TRUE ~ 'bacteria'
+    ),
+    filter = str_extract(sample, '0.22|0.45|0.8 PES|0.8 PC') %>%
+      fct_explicit_na('None'),
+    centrifuge = str_detect(sample, '17000g')
+  ) %>%
+  glimpse
+```
+
+```{r, include = F, eval = F}
+otu <- x %>%
+  select(taxon, sample, reads) %>%
+  pivot_wider(names_from = sample, values_from = reads) %>%
+  otu_table(taxa_are_rows = TRUE)
+```
+
+
+# Plots
+
+```{r}
+gm_mean <- function(x) exp(mean(log(x)))
+center_elts <- function(x) x / gm_mean(x)
+```
+
+
+```{r, eval = F, include = F}
+x %>%
+  ggplot(aes(y = sample, x = reads, fill = taxon)) +
+  geom_col(position = 'dodge') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  # scale_fill_manual(values = colors_oi %>% unname) +
+  labs(
+    x = 'Sample',
+    y = 'Reads',
+    fill = 'Taxon'
+  )
+```
+
+```{r, eval = F, include = F, fig.dim = c(6, 9)}
+x %>%
+  mutate(.by = sample, across(reads, ~ .x / gm_mean(.x))) %>%
+  ggplot(aes(y = taxon, x = reads, fill = taxon_type)) +
+  facet_wrap(~ sample, ncol = 1) +
+  geom_point(position = 'dodge') +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    legend.position = 'bottom'
+  )
+```
+
+Relative abundances as centered ratios (abundance of taxon / gm mean of abundances of all taxa in that sample)
+
+```{r, fig.dim = c(8,6)}
+x %>%
+  filter(taxon != 'unmapped') %>%
+  mutate(.by = sample, value = center_elts(reads)) %>%
+  ggplot(aes(x = taxon, y = value, color = sample)) +
+  scale_color_manual(values = colors_oi %>% unname) +
+  facet_grid(~taxon_type, scales = 'free_x', space = 'free') +
+  scale_y_log10() +
+  geom_point() +
+  # rotate x-axis labels
+  labs(y = 'Centered ratio') +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+Relative abundances doubly centered: First, centered within samples as above. Then, center the taxon abundance across samples.
+This view helps to focus on the effect of protocols by adjusting for the difference in abundance among taxa.
+
+```{r, fig.dim = c(8,6)}
+x %>%
+  filter(taxon != 'unmapped') %>%
+  mutate(.by = sample, value = center_elts(reads)) %>%
+  mutate(.by = taxon, value = center_elts(value)) %>%
+  ggplot(aes(x = taxon, y = value, color = sample)) +
+  scale_color_manual(values = colors_oi %>% unname) +
+  facet_grid(~taxon_type, scales = 'free_x', space = 'free') +
+  scale_y_log10() +
+  geom_point() +
+  labs(y = 'Doubly-centered ratio') +
+  # rotate x-axis labels
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+Let's look at the gm-average relative abundance of viruses to bacteria across samples,
+
+```{r}
+ratios <- x %>%
+  summarize(.by = c(sample, taxon_type), value = gm_mean(reads)) %>%
+  select(taxon_type, sample, value) %>%
+  pivot_wider(names_from = taxon_type, values_from = value) %>%
+  mutate(ratio = virus / bacteria)
+```
+
+```{r, fig.dim = c(8,6)}
+p1 <- ratios %>%
+  ggplot(aes(x = ratio, y = sample)) +
+  scale_x_log10() +
+  geom_point()
+p1
+```
+
+This figure suggests that the .45 filter and the 0.8 PES filter perform similarly.
+
+Interesting that the .8 PC ratio is so much lower than the other filters.
+
+What if we don't care about mimivirus?
+Does the advantage of 0.8PES over .45 with centrifugation still hold?
+
+```{r}
+ratios_no_mimi <- x %>%
+  filter(taxon != 'Mimivirus') %>%
+  summarize(.by = c(sample, taxon_type), value = gm_mean(reads)) %>%
+  select(taxon_type, sample, value) %>%
+  pivot_wider(names_from = taxon_type, values_from = value) %>%
+  mutate(ratio = virus / bacteria)
+```
+
+```{r}
+p2 <- ratios_no_mimi %>%
+  ggplot(aes(x = ratio, y = sample)) +
+  scale_x_log10() +
+  geom_point()
+# p1 / p2
+p2
+```
+
+The modest advantage remains and overall everything looks very similar.
+
+
+
+Might be useful to look at the variance at the level of viruses.
+Could normalize everything relative to the GM of bacteria, and quantify the increase relative to the control.
+Doing this could give us some sense of variability, using variation among viruses as a proxy for variation among samples.
+It also let's us look for the effect on larger viruses.
+
+Here, I'll look at viral abundance as the ratio of that virus relative to the gm-average of bacterial species.
+
+```{r}
+ratios_spp <- x %>%
+  mutate(.by = sample,
+    ref = reads[taxon_type == 'bacteria'] %>% gm_mean,
+    value = reads / ref
+  ) %>%
+  filter(taxon_type == 'virus')
+avg <- ratios_spp %>%
+  summarize(.by = sample, across(value, gm_mean))
+```
+
+```{r, fig.dim = c(6,4) * 1.2}
+ratios_spp %>%
+  ggplot(aes(x = value, y = sample, color = taxon)) +
+  scale_color_brewer(type = 'qual', palette = 3) +
+  scale_x_log10() +
+  # geom_point() +
+  geom_quasirandom(width = 0.1) +
+  geom_point(data = avg, color = 'black', shape = 3)
+```
+
+```{r, fig.dim = c(6,4) * 1.2}
+avg <- ratios_spp %>%
+  filter(filter %in% c('0.45', '0.8 PES')) %>%
+  summarize(.by = c(sample, filter, centrifuge), across(value, gm_mean))
+ratios_spp %>%
+  filter(filter %in% c('0.45', '0.8 PES')) %>%
+  ggplot(aes(x = value, y = sample, color = taxon)) +
+  facet_wrap(~centrifuge, ncol = 1, scales = 'free_y', 
+             labeller = 'label_both') +
+  scale_color_brewer(type = 'qual', palette = 3) +
+  scale_x_log10() +
+  geom_quasirandom(width = 0.1) +
+  geom_point(data = avg, color = 'black', shape = 3)
+```
+
+What is the magnitude of increase due to 0.8PES versus 0.45?
+
+```{r}
+ratios_spp_filter <- ratios_spp %>%
+  filter(filter %in% c('0.45', '0.8 PES')) %>%
+  select(taxon, taxon_type, centrifuge, filter, value) %>%
+  pivot_wider(names_from = filter) %>%
+  mutate(ratio = `0.8 PES` / `0.45`) %>%
+  glimpse
+
+```
+
+```{r, fig.dim = c(6,4) * 1.2}
+ratios_spp_filter %>%
+  ggplot(aes(x = ratio, y = taxon, color = centrifuge)) +
+  theme_minimal_grid() +
+  # facet_wrap(~centrifuge, ncol = 1, scales = 'free_y') +
+  scale_color_brewer(type = 'qual', palette = 2) +
+  scale_x_log10(breaks = c(0.3, 1, 1.5, 3)) +
+  expand_limits(x = 3) +
+  # geom_vline(xintercept=1.4, color = 'darkred', size = 0.2) +
+  geom_point() +
+  labs(
+    x = 'Ratio of virus to gm-mean of all bacteria'
+  ) +
+  plot_annotation(
+    title = 'Advantage of 0.8 PES over 0.45, with and without centrifugation',
+  )
+```
+
+We're generally talking about a ~1.4-fold difference, not something huge.
+
+I'm not sure what is going on with the Polyomavirus without centrifugation, but without replication we shouldn't treat it too seriously.
