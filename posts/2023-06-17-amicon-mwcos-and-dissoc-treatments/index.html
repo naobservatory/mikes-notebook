@@ -112,12 +112,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","categories","bibliography","date","draft","output"]}},"value":[{"type":"character","attributes":{},"value":["Evaluate viral MGS protocols: Dissociation treatments and Amicon MWCOs"]},{"type":"NULL"},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Michael R. McLaren"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":[]}},"value":[]}]}]},{"type":"character","attributes":{},"value":["R","qPCR"]},{"type":"character","attributes":{},"value":["../../_references.bib"]},{"type":"character","attributes":{},"value":["2023-06-24"]},{"type":"logical","attributes":{},"value":[false]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","dev","toc","code_folding"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["png"]},{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]}]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","categories","bibliography","date","draft","output"]}},"value":[{"type":"character","attributes":{},"value":["Evaluate viral MGS protocols: Dissociation treatments and Amicon MWCOs"]},{"type":"NULL"},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Michael R. McLaren"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":[]}},"value":[]}]}]},{"type":"character","attributes":{},"value":["R","qPCR"]},{"type":"character","attributes":{},"value":["../../_references.bib"]},{"type":"character","attributes":{},"value":["2023-06-24"]},{"type":"logical","attributes":{},"value":[false]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","dev","toc","code_folding"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["svg"]},{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]}]}]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["main_files/anchor-4.2.2/anchor.min.js","main_files/bowser-1.9.3/bowser.min.js","main_files/distill-2.2.21/template.v2.js","main_files/figure-html5/unnamed-chunk-13-1.png","main_files/figure-html5/unnamed-chunk-15-1.png","main_files/figure-html5/unnamed-chunk-16-1.png","main_files/figure-html5/unnamed-chunk-20-1.png","main_files/figure-html5/unnamed-chunk-21-1.png","main_files/header-attrs-2.22/header-attrs.js","main_files/jquery-3.6.0/jquery-3.6.0.js","main_files/jquery-3.6.0/jquery-3.6.0.min.js","main_files/jquery-3.6.0/jquery-3.6.0.min.map","main_files/popper-2.6.0/popper.min.js","main_files/tippy-6.2.7/tippy-bundle.umd.min.js","main_files/tippy-6.2.7/tippy-light-border.css","main_files/tippy-6.2.7/tippy.css","main_files/tippy-6.2.7/tippy.umd.min.js","main_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["main_files/figure-html5/unnamed-chunk-13-1.svg","main_files/figure-html5/unnamed-chunk-15-1.svg","main_files/figure-html5/unnamed-chunk-16-1.svg","main_files/figure-html5/unnamed-chunk-20-1.svg","main_files/figure-html5/unnamed-chunk-21-1.svg"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2514,7 +2514,7 @@ $ d_rn                  &lt;dbl&gt; -0.0021315257, 0.0002468450, -0.014340…</c
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_abline.html'>geom_vline</a></span><span class='op'>(</span>xintercept <span class='op'>=</span> <span class='fl'>40</span>, color <span class='op'>=</span> <span class='st'>'grey'</span>, size <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span> </span>
 <span>  <span class='fu'><a href='https://rdrr.io/pkg/ggbeeswarm/man/geom_quasirandom.html'>geom_quasirandom</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="main_files/figure-html5/unnamed-chunk-13-1.png" width="2100" /></p>
+<p><img src="main_files/figure-html5/unnamed-chunk-13-1.svg" width="2100" /></p>
 </div>
 <p>This figure splits out the qPCR results by target, Amicon MWCO and sewer system (N vs. S), with the points colors by dissociation treatment.
 The three points of the same color for a given MWCO and facet panel are qPCR replicates.</p>
@@ -2591,7 +2591,7 @@ For SARS2, we see BE appears to decrease abundance to a large extent across all 
 <span>  <span class='co'># scale_shape_manual(values = c(1, 4)) +</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='st'>'Delta Rn'</span>, x <span class='op'>=</span> <span class='st'>'Cycle'</span>, color <span class='op'>=</span> <span class='st'>'Target'</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="main_files/figure-html5/unnamed-chunk-15-1.png" width="2700" /></p>
+<p><img src="main_files/figure-html5/unnamed-chunk-15-1.svg" width="2700" /></p>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2614,7 +2614,7 @@ For SARS2, we see BE appears to decrease abundance to a large extent across all 
 <span>  <span class='co'># scale_shape_manual(values = c(1, 4)) +</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='st'>'Rn'</span>, x <span class='op'>=</span> <span class='st'>'Cycle'</span>, color <span class='op'>=</span> <span class='st'>'Target'</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="main_files/figure-html5/unnamed-chunk-16-1.png" width="2700" /></p>
+<p><img src="main_files/figure-html5/unnamed-chunk-16-1.svg" width="2700" /></p>
 </div>
 <h2 id="qubit-measurements">Qubit measurements</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -2840,7 +2840,7 @@ $ qubit_dna_adj    &lt;dbl&gt; 4, 4, 4, 146, 4, 4, 4, 333, 4, 4, 4, 188, 4…</c
 <span>  <span class='co'># expand_limits(x = 0.1) +</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="main_files/figure-html5/unnamed-chunk-20-1.png" width="1950" /></p>
+<p><img src="main_files/figure-html5/unnamed-chunk-20-1.svg" width="1950" /></p>
 </div>
 <p>We see high (out of range) values for the BE-treated samples, which may be caused by bovine NA in the beef extract.
 We also see that the DNA measurements can’t distinguish the other treatments, due to the relatively high lower limit of the BR assay that was used.</p>
@@ -2871,7 +2871,7 @@ Note that I have set the measurement that is OOR (below lower limit) to the lowe
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_abline.html'>geom_vline</a></span><span class='op'>(</span>xintercept <span class='op'>=</span> <span class='fl'>0.2</span>, color <span class='op'>=</span> <span class='st'>'grey'</span>, size <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span> </span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="main_files/figure-html5/unnamed-chunk-21-1.png" width="1950" /></p>
+<p><img src="main_files/figure-html5/unnamed-chunk-21-1.svg" width="1950" /></p>
 </div>
 <p>This evidence suggests that the NaCl treatment tends to give lower yields than the other two treatments, and that the Tween treatment tends to give higher yields than the None treatment, though the evidence is not that strong (particularly for the advantage of Tween over None) due to limited sample size.</p>
 <h2 id="linear-modeling">Linear modeling</h2>
