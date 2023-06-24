@@ -1,0 +1,457 @@
+---
+title: "Evaluate viral MGS protocols: Dissociation treatments and Amicon MWCOs"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+  - qPCR
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+This experiment compares two different Amicon molecular weight cut-offs (MWCOs), 30 kDa and 100 kDa, and 4 dissociation treatments (None, NaCl, Tween-20, and a method using beef extract (BE).
+
+[Drive folder](https://drive.google.com/drive/u/0/folders/1KYo3bD5lqQt_vmNtpuq01-2ti6N4uXFs)
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+# Custon qPCR helpers
+source('_functions.R')
+```
+
+# Data import
+
+```{r}
+fns <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Results_*.csv')
+fns %>% path_file
+```
+
+I'll just use the 'Adjusted' SARS2 results when I import,
+
+```{r}
+fns_filt <- fns %>% str_subset(negate = TRUE, 'Raw')
+fns_filt %>% path_file
+```
+
+We can use the following snippet to pull out the target name from the file path,
+
+```{r}
+base <- fns %>% path_common
+base_num <- base %>% path_split %>% .[[1]] %>% length
+fns %>% path_split %>% map(tail, -base_num) %>% map_chr(head, 1)
+```
+
+```{r}
+# Pattern for extracting experimental metadata from sample names; 
+# Experimental metadata stored in qpcr sample name as '<sewer_system>_<amicon_mwco>_<dissoc_treatment>'
+pat <- '(N|S)_(30|100)_(None|Tween|BE|NaCl)'
+
+results <- tibble(file = fns_filt) %>%
+  mutate(
+    dir_name = file %>% path_split %>% map(tail, -base_num) %>% map_chr(head, 1),
+    data = map(file, read_qpcr_results_csv)
+  ) %>%
+  # select(-file) %>%
+  separate(dir_name, into = c('dir_date', 'dir_target'), remove = FALSE, sep = ' ') %>%
+  mutate(
+    dir_date = dir_date %>% lubridate::ymd(),
+  ) %>%
+  unnest(data) %>%
+  # Extract experimental sample metadata from sample names
+  mutate(
+    match = str_match(sample, pat),
+  ) %>%
+  mutate(.keep = 'unused',
+    sample_experiment = match[,1],
+    sewer_system = match[,2],
+    amicon_mwco = match[,3] %>% fct_relevel('30'),
+    dissoc_treatment = match[,4] %>% fct_relevel('None'),
+  ) %>%
+  mutate(
+    cq = ifelse(is.na(cq), 40, cq)
+  ) %>%
+  glimpse
+```
+
+Note, in cases where the Cq value could not be determined, I set the value to 40.
+  
+```{r}
+results %>% count(dir_target)
+results %>% count(dir_target, file %>% path_file)
+# results %>% count(target)
+results %>% count(dir_target, target)
+# results %>% count(sample) %>% print(n=Inf)
+```
+
+```{r}
+results %>% count(sample) %>% deframe
+results %>% count(sample_experiment) %>% deframe
+```
+
+TODO: Check status of samples with no name; are these blanks?
+
+Load amplification data,
+
+```{r}
+fns_amp <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Amplification Data_*.csv') %>%
+  str_subset(negate = TRUE, 'Raw')
+
+amp <- tibble(file = fns_amp) %>%
+  mutate(
+    dir_name = file %>% path_split %>% map(tail, -base_num) %>% map_chr(head, 1),
+    data = map(file, read_qpcr_amplification_csv)
+  ) %>%
+  # select(-file) %>%
+  separate(dir_name, into = c('dir_date', 'dir_target'), remove = FALSE, sep = ' ') %>%
+  mutate(
+    dir_date = dir_date %>% lubridate::ymd(),
+  ) %>%
+  unnest(data) %>%
+  glimpse
+
+results_min <- results %>%
+  select(dir_name, well, task:dissoc_treatment)
+amp <- amp %>% 
+  left_join(results_min, by = c('dir_name', 'well'))
+```
+
+TODO: find a better way to import the amplification data and results at the same time
+
+Get the baseline coordinates for plotting,
+
+```{r}
+baselines <- results %>%
+  pivot_longer(
+    cols = c(baseline_start, baseline_end),
+    names_to = 'baseline_boundary',
+    values_to = 'cycle_number',
+    names_prefix = 'baseline_',
+  ) %>%
+  left_join(
+    amp %>% select(well_position, cycle_number, rn, d_rn), 
+    by = c('well_position', 'cycle_number')
+  ) %>%
+  glimpse
+```
+
+
+# Analysis
+
+Three types of conditions:
+
+#. Sewer system (N or S)
+#. Amicon filter pore size / molecular weight cutoff
+#. Dissociation treatment
+
+```{r}
+results %>%
+  count(sewer_system, amicon_mwco, dissoc_treatment)
+```
+
+```{r, eval =F, include = F}
+results %>%
+  filter(is.na(sample_experiment)) %>%
+  pull(sample)
+```
+
+```{r}
+results_main <- results %>%
+  filter(!is.na(sample_experiment))
+```
+
+```{r, fig.dim = c(7,5)}
+results_main %>%
+  ggplot(aes(x = cq, y = amicon_mwco, color = dissoc_treatment)) +
+  # theme_minimal_vgrid() +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(1, 'char'),
+  ) +
+  labs(
+    y = 'Amicon MWCO (kDa)',
+    x = 'Cq value',
+    color = 'Dissoc. treatment',
+  ) +
+  facet_grid(sewer_system ~ dir_target, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_vline(xintercept = 40, color = 'grey', size = 0.3) + 
+  geom_quasirandom()
+```
+
+This figure splits out the qPCR results by target, Amicon MWCO and sewer system (N vs. S), with the points colors by dissociation treatment.
+The three points of the same color for a given MWCO and facet panel are qPCR replicates.
+
+We can see that the impact of the BE treatment is highly variable.
+BE tends to increase the Cq of 16S (decrease abundance) relative to the other treatments, but the effect is minor relative to None in the N-100 sample and large in the other three.
+BE decreases Crassphage and phagemid Cq values in the N-100 and S-100 samples (relative to other treatments), but increases the Cq in the N-30 and S-30 samples.
+There is an extreme effect (increase in Cq) of BE on Crassphage in the S-30 sample, with two qPCR replicates failing to yield Cq values below 40.
+For SARS2, we see BE appears to decrease abundance to a large extent across all four samples, to the extent that we fail to get Cq values for any replicates except one N-100 replicate.
+
+From these results, I suggest that we remove the BE treatment from further consideration, due to its high variance and strong negative effect on SARS2 measurement (along with the technical difficulty of applying it in the lab).
+
+## Inspect SARS2 amplification curves
+
+- Many SARS2 BE replicates are shown in the results as didn't amplify 
+- The software will compute an average Cq value even if one of the three replicates is Undetermined.
+- I should inspect the amplification curves to see what went wrong
+<!---->
+
+```{r}
+condition_vars <- c('sewer_system', 'amicon_mwco', 'dissoc_treatment')
+results %>%
+  filter(dir_target == 'SARS-CoV-2') %>%
+  summarize(.by = c(sample, condition_vars), num_na = sum(is.na(cq))) %>%
+  arrange(dissoc_treatment) %>%
+  print(n=Inf)
+  # arrange(desc(num_na))
+```
+
+HERE. Check amplification.
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+ct_threshold <- results %>% filter(dir_target == 'SARS-CoV-2') %>% pull(threshold) %>% unique
+stopifnot(length(ct_threshold) == 1)
+
+amp %>%
+  filter(
+    dir_target == 'SARS-CoV-2',
+    !is.na(sewer_system)
+  ) %>%
+  ggplot(aes(cycle_number, pmax(d_rn, delta_rn_min), color = dissoc_treatment)) +
+  facet_grid(sewer_system ~ amicon_mwco, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  scale_y_log10() +
+  geom_line(aes(group = well)) +
+  geom_hline(yintercept = ct_threshold, alpha = 0.3) +
+  # scale_color_brewer(type = 'qual') +
+  # geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  # scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+```
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+ct_threshold <- results %>% filter(dir_target == 'SARS-CoV-2') %>% pull(threshold) %>% unique
+stopifnot(length(ct_threshold) == 1)
+
+amp %>%
+  filter(
+    dir_target == 'SARS-CoV-2',
+    !is.na(sewer_system)
+  ) %>%
+  ggplot(aes(cycle_number, pmax(rn, delta_rn_min), color = dissoc_treatment)) +
+  facet_grid(sewer_system ~ amicon_mwco, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  scale_y_log10() +
+  geom_line(aes(group = well)) +
+  # scale_color_brewer(type = 'qual') +
+  # geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  # scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Rn', x = 'Cycle', color = 'Target')
+```
+
+
+## Qubit measurements
+
+```{r}
+url <- 'https://docs.google.com/spreadsheets/d/1OUp0DBVb3QOrELZ32-4C6Ia3QH1x_G95nCJFW2h8I4k'
+qubit <- googlesheets4::read_sheet(url, col_types = 'ccnccc') %>%
+  janitor::clean_names() %>%
+  rename(
+    sewer_system = system,
+    amicon_mwco = mwco,
+    dissoc_treatment = treatment,
+    qubit_rna_raw = qubit_hs_rna_ng_ul,
+    qubit_dna_raw = qubit_br_dna_ng_ul,
+  ) %>%
+  glimpse
+qubit_raw <- qubit
+```
+
+```{r}
+qubit <- qubit_raw %>%
+  mutate(
+    across(matches('qubit_(rna|dna)_raw'), 
+      ~ifelse(str_detect(.x, 'OOR'), NA, .x) %>% as.numeric,
+      .names = "{str_replace(.col, '_raw', '')}"
+    ),
+    qubit_rna_adj = case_when(
+      qubit_rna_raw == 'OOR (>10 ng/uL)' ~ 10,
+      qubit_rna_raw == 'OOR (<0.2 ng/uL)' ~ 0.2,
+      TRUE ~ qubit_rna
+    ),
+    qubit_dna_adj = case_when(
+      qubit_dna_raw == 'OOR (<4 ng/uL)' ~ 4,
+      TRUE ~ qubit_dna
+    ),
+    across(amicon_mwco, as.factor),
+    across(dissoc_treatment, ~fct_relevel(.x, 'None')),
+  ) %>%
+  glimpse
+```
+
+```{r}
+qubit %>%
+  select(sewer_system:dissoc_treatment, qubit_rna_raw, qubit_dna_raw) %>%
+  knitr::kable()
+```
+
+```{r}
+qubit %>%
+  select(sample:dissoc_treatment, matches('qubit_(rna|dna)_adj')) %>%
+  pivot_longer(matches('qubit_(rna|dna)_adj')) %>%
+  ggplot(aes(x = value, y = amicon_mwco, color = dissoc_treatment)) +
+  # theme_minimal_vgrid() +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(1, 'char'),
+  ) +
+  labs(
+    y = 'Amicon MWCO (kDa)',
+    x = 'Concentration (ng/uL)',
+    color = 'Dissoc. treatment',
+  ) +
+  facet_grid(sewer_system ~ name, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  # geom_vline(xintercept = 40, color = 'grey', size = 0.3) + 
+  scale_x_log10() +
+  # expand_limits(x = 0.1) +
+  geom_point()
+```
+
+We see high (out of range) values for the BE-treated samples, which may be caused by bovine NA in the beef extract.
+We also see that the DNA measurements can't distinguish the other treatments, due to the relatively high lower limit of the BR assay that was used.
+
+Compared to our 2022 tests using DNA extractions, we have concentrated more wastewater than in our previous experiments (40 mL instead of 10 mL per sample). 
+Those extractions used a different extraction kit.
+I would need to revisit those results to see if I'd expect to be seeing <4 ng/uL.
+
+Let's look at the RNA measurements of the non-BE treatments, where the Qubit results are most informative.
+Note that I have set the measurement that is OOR (below lower limit) to the lower limit value of 0.2.
+
+```{r}
+qubit %>%
+  filter(dissoc_treatment != 'BE') %>%
+  ggplot(aes(x = qubit_rna_adj, y = amicon_mwco, color = dissoc_treatment)) +
+  # theme_minimal_vgrid() +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(1, 'char'),
+  ) +
+  labs(
+    y = 'Amicon MWCO (kDa)',
+    x = 'Concentration (ng/uL)',
+    color = 'Dissoc. treatment',
+  ) +
+  facet_grid(sewer_system ~ ., scales = 'free') +
+  scale_x_log10() +
+  # expand_limits(x = 0.1) +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_vline(xintercept = 0.2, color = 'grey', size = 0.3) + 
+  geom_point()
+```
+
+This evidence suggests that the NaCl treatment tends to give lower yields than the other two treatments, and that the Tween treatment tends to give higher yields than the None treatment, though the evidence is not that strong (particularly for the advantage of Tween over None) due to limited sample size.
+
+
+## Linear modeling
+
+This was a warm-up exercise I did before looking at data carefully and making the above exploratory plots.
+Care should be taken in interpretting these results, including my quick attempts at interpreting them below.
+
+Fit linear model to assess the effect of conditions on the Cq value of a single target.
+
+```{r}
+fits <- results_main  %>%
+  summarize(
+    .by = c(sample_experiment, dir_target, sewer_system, amicon_mwco, dissoc_treatment),
+    across(cq, mean)
+  ) %>%
+  nest(.by = dir_target) %>%
+  mutate(.keep = 'unused',
+    fit = map(data, ~lm(data = .x, cq ~ sewer_system + amicon_mwco + dissoc_treatment)),
+    # fit_tidy = map(fit, broom::tidy)
+  )
+fits_summary <- fits %>%
+  mutate(.keep = 'unused',
+    tidy = map(fit, broom::tidy)
+  ) %>%
+  unnest(tidy)
+```
+
+Impact of dissoc treatment:
+
+```{r}
+fits_summary %>%
+  filter(str_detect(term, 'dissoc')) %>%
+  select(dir_target, term, estimate, std.error, p.value) 
+```
+
+- BE caused bacterial 16S to decrease by a substantial factor (increase in Cq) relative to the other dissociation treatments
+- BE had an uncertain effect on the phage and phagemid; but smaller than the effect on bacteria. TODO: Look into why no est for SARS2.
+
+Thus it appears that BE helps by reducing bacteria. I don't think we expected this result, and I'd want to understand it better.
+
+Impact of Amicon filter type:
+
+```{r}
+fits_summary %>%
+  filter(str_detect(term, 'amicon')) %>%
+  select(dir_target, term, estimate, std.error, p.value) 
+```
+
+No clear effect (large standard errors relative to average effect).
+For viruses except SASR2, data consistent with effects on the order of roughly 2-4-fold in either direction.
+For SARS2, data consistent with a 1-4-fold decrease with a mean est of 2-fold decrease.
+
+Now, fit model to lo at cq differences of viruses relative to bacteria
+
+
+# Session info {.appendix}
+
+<details><summary>Click for session info</summary>
+```{r, R.options = list(width = 83)}
+sessioninfo::session_info()
+```
+</details>

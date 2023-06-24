@@ -1,0 +1,67 @@
+## Import Results CSV file
+
+```{r}
+fns <- here('_data/nao/2023-06-protocol-dev/qPCR data files') %>%
+  dir_ls(recurse = TRUE, glob = '*_Results_*.csv')
+```
+
+```{r}
+results <- fns[1] %>%
+  readr::read_csv(
+    comment = '#',
+  ) %>%
+  janitor::clean_names() %>%
+  glimpse
+results %>% pull(cq)
+results %>% filter(cq == 'Undetermined') %>% glimpse
+```
+
+```{r}
+results <- fns[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = 'iclccccccncccnnnlnlii',
+  ) %>%
+  janitor::clean_names() %>%
+  separate(well_position, into = c('row', 'column'), sep = 1, remove = FALSE) %>%
+  mutate(
+    cq = ifelse(cq == 'Undetermined', NA, cq) %>% as.numeric,
+    # for column, coerce to integer first to remove leading zeros
+    across(column, ~as.integer(.x) %>% ordered),
+    across(row, ~ordered(.x, levels = LETTERS[1:8])),
+  ) %>%
+  glimpse
+```
+
+## Import Amplification CSV file
+
+```{r}
+fns <- here('_data/nao/2023-06-protocol-dev/qPCR data files') %>%
+  dir_ls(recurse = TRUE, glob = '*_Amplification Data_*.csv')
+fns %>% path_file
+```
+
+```{r}
+amp <- fns[1] %>%
+  readr::read_csv(
+    comment = '#',
+  ) %>%
+  janitor::clean_names() %>%
+  glimpse
+```
+
+```{r}
+amp <- fns[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = 'icicnncl',
+  ) %>%
+  janitor::clean_names() %>%
+  separate(well_position, into = c('row', 'column'), sep = 1, remove = FALSE) %>%
+  mutate(
+    # for column, coerce to integer first to remove leading zeros
+    across(column, ~as.integer(.x) %>% ordered),
+    across(row, ~ordered(.x, levels = LETTERS[1:8])),
+  ) %>%
+  glimpse
+```
