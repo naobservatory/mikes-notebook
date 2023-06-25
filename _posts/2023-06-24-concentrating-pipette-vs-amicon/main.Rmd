@@ -1,0 +1,307 @@
+---
+title: "Evaluate viral MGS protocols: Amicon centrifugal filters vs InnovaPrep Concentrating Pipette"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+  - qPCR
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  cache = TRUE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+This experiment compares Amicon filters (30 kDa and 100 kDa) vs the InnovaPrep Concentrating Pipette (two tip types).
+
+[Drive folder](https://drive.google.com/drive/folders/1ADu2YNofmC1iEt7CcvYEys-45bIg_70g)
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+
+# Custon qPCR helpers
+source('_functions.R')
+```
+
+# Data import
+
+Metadata is stored in a Google Sheet,
+
+```{r}
+url <- 'https://docs.google.com/spreadsheets/d/1qBD6ZhDDtGBx1iYgcIJf6GZJhOZoS6B15vtvhJYdkoo'
+meta_samples <- read_sheet(url, sheet = 'Samples', na = c("", "NA")) %>%
+  glimpse
+meta_targets <- read_sheet(url, sheet = 'Targets', na = c("", "NA")) %>%
+  glimpse
+```
+
+Results are in CSV files,
+
+```{r}
+fns <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Results_*.csv')
+fns %>% path_file
+```
+
+TODO: pull additional metadata from the comments in the CSV file
+
+```{r}
+results_raw <- tibble(file = fns) %>%
+  mutate(.keep = 'unused',
+    data = map(file, read_qpcr_results_csv)
+  ) %>%
+  unnest(data)
+```
+
+```{r}
+results <- results_raw %>%
+  rename(target_qpcr = target) %>%
+  left_join(meta_samples, by = c('sample' = 'sample_qpcr')) %>%
+  left_join(meta_targets, by = 'target_qpcr') %>%
+  mutate(
+    across(c(treatment_group, amicon_mwco, volume, method_short, filter), as.factor),
+    cq = ifelse(is.na(cq), 40, cq),
+    across(method_short, ~fct_relevel(.x, 'Amicon')),
+    across(filter, ~fct_relevel(.x, '30 kDa')),
+    method_filter = interaction(method_short, filter, drop = TRUE, sep = ': ', lex.order = TRUE)
+  )
+```
+
+Note, in cases where the Cq value could not be determined, I set the value to 40.
+
+```{r}
+results %>% count(treatment_group, cq_status)
+```
+
+In this experiment, the Cq value was determined for all the non-control samples.
+
+```{r}
+results %>%
+  count(target_qpcr, target)
+```
+
+Load amplification data,
+
+```{r}
+fns_amp <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Amplification Data_*.csv') %>%
+  str_subset(negate = TRUE, 'Raw')
+
+amp <- tibble(file = fns_amp) %>%
+  mutate(.keep = 'unused',
+    data = map(file, read_qpcr_amplification_csv)
+  ) %>%
+  unnest(data) %>%
+  rename(target_qpcr = target) %>%
+  left_join(results)
+```
+
+TODO: find a better way to import the amplification data and results at the same time
+
+Get the baseline coordinates for plotting,
+
+```{r}
+baselines <- results %>%
+  pivot_longer(
+    cols = c(baseline_start, baseline_end),
+    names_to = 'baseline_boundary',
+    values_to = 'cycle_number',
+    names_prefix = 'baseline_',
+  ) %>%
+  left_join(
+    amp %>% select(well_position, cycle_number, rn, d_rn), 
+    by = c('well_position', 'cycle_number')
+  )
+```
+
+
+# Analysis
+
+The source samples are either from the N or S sewer system.
+
+The treatment group is determined by
+
+#. Amicon vs InnovaPrep Concentrating Pipette (CP)
+#. Filter pore size: Amicon MWCO (30 kDa or 100 kDa) or CP tip type (0.05um or 'Ultra')
+#. Volume used (40 mL or 80 mL); only applies to CP
+
+```{r}
+results %>%
+  count(treatment_group, method_short, filter, volume)
+```
+
+```{r, fig.dim = c(8, 5) * 1.3}
+results %>%
+  filter(!is.na(treatment_group)) %>%
+  ggplot(aes(x = cq, y = method_filter, color = volume)) +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(2, 'char'),
+    # panel.spacing.x = unit(4, 'char'),
+  ) +
+  scale_x_continuous(n.breaks = 4) +
+  labs(
+    y = 'Method : Filter',
+    x = 'Cq',
+    color = 'Volume (mL)',
+  ) +
+  facet_grid(sewer_system ~ target, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_quasirandom()
+```
+
+```{r, fig.dim = c(7, 9) * 1.3}
+results %>%
+  filter(!is.na(treatment_group)) %>%
+  ggplot(aes(x = cq, y = method_filter, color = volume)) +
+  # theme_minimal_vgrid() +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(2, 'char'),
+    # panel.spacing.x = unit(4, 'char'),
+  ) +
+  labs(
+    y = 'Method : Filter',
+    x = 'Cq',
+    color = 'Volume (mL)',
+  ) +
+  # facet_grid(sewer_system ~ target, scales = 'free') +
+  facet_wrap(
+    target ~ sewer_system , scales = 'free_x', ncol = 2, 
+    labeller = function(x) label_value(x, multi_line = FALSE)
+  ) +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_quasirandom()
+```
+
+Note that for the CP 0.05 um filter, it appears that the 80mL sample led to a lower concentration for the four naturally-occurring targets (Bacterial 16S, CrAssphage, Norovirus, and SARS2).
+This is surprising and the only one of four 80mL samples where the measured concentrations were lower.
+Might this indicate a mistake in the sample preparation?
+
+The N Amicon 100 sample led to much lower measured concentrations than the N Amicon 30 sample for everything except SARS2.
+Possibly there was a handling error or the Amicon filter was defective.
+
+## Inspect SARS2 amplification curves
+
+```{r, fig.dim = c(6,4)*1.5}
+delta_rn_min <- 1e-3
+ct_threshold <- results %>% filter(target == 'SARS-CoV-2') %>% pull(threshold) %>% unique
+stopifnot(length(ct_threshold) == 1)
+
+amp %>%
+  filter(
+    target == 'SARS-CoV-2',
+    !is.na(treatment_group)
+  ) %>%
+  ggplot(aes(cycle_number, pmax(d_rn, delta_rn_min), color = method_filter)) +
+  facet_grid(sewer_system ~ volume, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  scale_y_log10() +
+  geom_line(aes(group = well)) +
+  geom_hline(yintercept = ct_threshold, alpha = 0.3) +
+  # scale_color_brewer(type = 'qual') +
+  # geom_point(data = baselines, aes(shape = baseline_boundary), size = 3) +
+  # scale_shape_manual(values = c(1, 4)) +
+  labs(y = 'Delta Rn', x = 'Cycle', color = 'Target')
+```
+
+
+## Linear modeling
+
+Fit linear model to assess the effect of conditions on the Cq value on each target.
+Quick and unreliable analysis.
+
+Measure effect on average Cq value of the concentration treatment relative to the Amicon 30 kDa treatment.
+A positive effect corresponds to a decrease in concentration.
+
+```{r}
+fits <- results %>%
+  filter(!is.na(treatment_group), volume == 40) %>%
+  summarize(
+    .by = c(target, method_short, method_filter, sewer_system),
+    across(cq, mean)
+  ) %>%
+  nest(.by = target) %>%
+  mutate(.keep = 'unused',
+    fit = map(data, ~lm(data = .x, cq ~ sewer_system + method_filter)),
+    # fit_tidy = map(fit, broom::tidy)
+  )
+fits_summary <- fits %>%
+  mutate(.keep = 'unused',
+    tidy = map(fit, broom::tidy)
+  ) %>%
+  unnest(tidy)
+```
+
+```{r}
+fits_summary %>%
+  filter(str_detect(term, 'method_filter')) %>%
+  mutate(
+    method_filter = str_replace(term, 'method_filter', '')
+  ) %>%
+  select(target, method_filter, estimate, std.error, p.value) 
+```
+
+
+```{r, fig.dim = c(8, 4)}
+fits_summary %>%
+  filter(
+         str_detect(term, 'method_filter'),
+         # str_detect(term, 'CP:'),
+  ) %>%
+  mutate(
+    method_filter = str_replace(term, 'method_filter', '')
+  ) %>%
+  ggplot(aes(y = target, x = estimate, 
+             xmin = estimate - 2 * std.error, 
+             xmax = estimate + 2 * std.error, 
+             color = method_filter
+             )) +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_vline(xintercept = 0, color = 'grey') +
+  geom_pointrange(position = ggstance::position_dodgev(height = 0.3))
+```
+
+
+# Session info {.appendix}
+
+<details><summary>Click for session info</summary>
+```{r, R.options = list(width = 83)}
+sessioninfo::session_info()
+```
+</details>
