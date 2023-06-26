@@ -2243,7 +2243,7 @@ $ target      &lt;chr&gt; &quot;CrAssphage&quot;, &quot;Phagemid tracers&quot;, 
 <span>    cq <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>cq</span><span class='op'>)</span>, <span class='fl'>40</span>, <span class='va'>cq</span><span class='op'>)</span>,</span>
 <span>    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='va'>method_short</span>, <span class='op'>~</span><span class='fu'><a href='https://forcats.tidyverse.org/reference/fct_relevel.html'>fct_relevel</a></span><span class='op'>(</span><span class='va'>.x</span>, <span class='st'>'Amicon'</span><span class='op'>)</span><span class='op'>)</span>,</span>
 <span>    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='va'>filter</span>, <span class='op'>~</span><span class='fu'><a href='https://forcats.tidyverse.org/reference/fct_relevel.html'>fct_relevel</a></span><span class='op'>(</span><span class='va'>.x</span>, <span class='st'>'30 kDa'</span><span class='op'>)</span><span class='op'>)</span>,</span>
-<span>    method_filter <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/interaction.html'>interaction</a></span><span class='op'>(</span><span class='va'>method_short</span>, <span class='va'>filter</span>, drop <span class='op'>=</span> <span class='cn'>TRUE</span>, sep <span class='op'>=</span> <span class='st'>': '</span><span class='op'>)</span></span>
+<span>    method_filter <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/interaction.html'>interaction</a></span><span class='op'>(</span><span class='va'>method_short</span>, <span class='va'>filter</span>, drop <span class='op'>=</span> <span class='cn'>TRUE</span>, sep <span class='op'>=</span> <span class='st'>': '</span>, lex.order <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
 <span>  <span class='op'>)</span></span></code></pre>
 </div>
 </div>
@@ -2451,20 +2451,20 @@ A positive effect corresponds to a decrease in concentration.</p>
 <pre><code># A tibble: 15 × 5
    target           method_filter   estimate std.error p.value
    &lt;chr&gt;            &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
- 1 Bacterial 16S    CP: 0.05 CPT      0.390      0.246 0.211  
- 2 Bacterial 16S    Amicon: 100 kDa   0.576      0.246 0.101  
+ 1 Bacterial 16S    Amicon: 100 kDa   0.576      0.246 0.101  
+ 2 Bacterial 16S    CP: 0.05 CPT      0.390      0.246 0.211  
  3 Bacterial 16S    CP: Ultra CPT    -0.222      0.246 0.433  
- 4 SARS-CoV-2       CP: 0.05 CPT     -0.954      0.249 0.0313 
- 5 SARS-CoV-2       Amicon: 100 kDa  -0.0981     0.249 0.720  
+ 4 SARS-CoV-2       Amicon: 100 kDa  -0.0981     0.249 0.720  
+ 5 SARS-CoV-2       CP: 0.05 CPT     -0.954      0.249 0.0313 
  6 SARS-CoV-2       CP: Ultra CPT    -0.937      0.249 0.0328 
- 7 Norovirus        CP: 0.05 CPT     -0.385      0.306 0.298  
- 8 Norovirus        Amicon: 100 kDa   0.446      0.306 0.241  
+ 7 Norovirus        Amicon: 100 kDa   0.446      0.306 0.241  
+ 8 Norovirus        CP: 0.05 CPT     -0.385      0.306 0.298  
  9 Norovirus        CP: Ultra CPT    -0.507      0.306 0.196  
-10 CrAssphage       CP: 0.05 CPT     -0.276      1.25  0.840  
-11 CrAssphage       Amicon: 100 kDa   1.54       1.25  0.307  
+10 CrAssphage       Amicon: 100 kDa   1.54       1.25  0.307  
+11 CrAssphage       CP: 0.05 CPT     -0.276      1.25  0.840  
 12 CrAssphage       CP: Ultra CPT    -0.796      1.25  0.569  
-13 Phagemid tracers CP: 0.05 CPT      1.38       0.194 0.00572
-14 Phagemid tracers Amicon: 100 kDa   0.395      0.194 0.134  
+13 Phagemid tracers Amicon: 100 kDa   0.395      0.194 0.134  
+14 Phagemid tracers CP: 0.05 CPT      1.38       0.194 0.00572
 15 Phagemid tracers CP: Ultra CPT     0.502      0.194 0.0807 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
