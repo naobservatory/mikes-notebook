@@ -70,15 +70,20 @@ meta_targets <- read_sheet(url, sheet = 'Targets', na = c("", "NA")) %>%
   glimpse
 ```
 
-Results are in CSV files,
+Results are in CSV files.
+
+```{r}
+'_data' %>% dir_ls(recurse = TRUE, glob = '*Result*')
+```
+
+There are three different types.
+Here I'll use the 'Standard Curve Result' files, which include what is in the 'Results' files but also have standard curve (SC) calibrations,
 
 ```{r}
 fns <- '_data' %>%
-  dir_ls(recurse = TRUE, glob = '*_Results_*.csv')
+  dir_ls(recurse = TRUE, glob = '*_Standard Curve Result_*.csv')
 fns %>% path_file
 ```
-
-TODO: pull additional metadata from the comments in the CSV file
 
 ```{r}
 results_raw <- tibble(file = fns) %>%
@@ -95,17 +100,14 @@ results <- results_raw %>%
   left_join(meta_targets, by = 'target_qpcr') %>%
   mutate(
     across(c(treatment_group, amicon_mwco, volume, method_short, filter), as.factor),
-    cq = ifelse(is.na(cq), 40, cq),
     across(method_short, ~fct_relevel(.x, 'Amicon')),
     across(filter, ~fct_relevel(.x, '30 kDa')),
     method_filter = interaction(method_short, filter, drop = TRUE, sep = ': ', lex.order = TRUE)
   )
 ```
 
-Note, in cases where the Cq value could not be determined, I set the value to 40.
-
 ```{r}
-results %>% count(treatment_group, cq_status)
+results %>% count(task, cq_status)
 ```
 
 In this experiment, the Cq value was determined for all the non-control samples.
@@ -165,9 +167,14 @@ results %>%
   count(treatment_group, method_short, filter, volume)
 ```
 
+## Plot Cq estimates
+
+For these plots, in cases where the Cq value could not be determined, I set the value to 40.
+
 ```{r, fig.dim = c(8, 5) * 1.3}
 results %>%
   filter(!is.na(treatment_group)) %>%
+  mutate(cq = ifelse(is.na(cq), 40, cq)) %>%
   ggplot(aes(x = cq, y = method_filter, color = volume)) +
   theme(
     legend.position = 'bottom',
@@ -188,6 +195,7 @@ results %>%
 ```{r, fig.dim = c(7, 9) * 1.3}
 results %>%
   filter(!is.na(treatment_group)) %>%
+  mutate(cq = ifelse(is.na(cq), 40, cq)) %>%
   ggplot(aes(x = cq, y = method_filter, color = volume)) +
   # theme_minimal_vgrid() +
   theme(
@@ -216,6 +224,8 @@ Might this indicate a mistake in the sample preparation?
 The N Amicon 100 sample led to much lower measured concentrations than the N Amicon 30 sample for everything except SARS2.
 Possibly there was a handling error or the Amicon filter was defective.
 
+# Analysis for illustration purposes
+
 ## Inspect SARS2 amplification curves
 
 ```{r, fig.dim = c(6,4)*1.5}
@@ -241,10 +251,150 @@ amp %>%
 ```
 
 
+## Plot concentration estimates
+
+In this results output, only the 16S and SARS2 results have standard curves loaded and calibrated concentrations estimated,
+
+```{r}
+results %>%
+  count(target, is.na(slope), is.na(quantity))
+```
+
+I believe that is because only these two targets had SC controls run in this experiment, and old SCs were not loaded into the software.
+I'll make the plot as if all targets had SCs and calibrated concentration estimates, for illustration purposes.
+
+```{r, fig.dim = c(8, 5) * 1.3}
+results %>%
+  filter(!is.na(treatment_group)) %>%
+  ggplot(aes(x = quantity, y = method_filter, color = volume)) +
+  theme(
+    legend.position = 'bottom',
+    panel.spacing = unit(2, 'char'),
+    # panel.spacing.x = unit(4, 'char'),
+  ) +
+  scale_x_log10() +
+  labs(
+    y = 'Method : Filter',
+    x = 'Concentration',
+    color = 'Volume (mL)',
+  ) +
+  facet_grid(sewer_system ~ target, scales = 'free') +
+  scale_color_manual(values = colors_oi %>% unname) +
+  geom_quasirandom()
+```
+
+Note that concentration varies in opposition to exp(Cq); it is higher when Cq is lower.
+
+## Fitting and using standard curves
+
+
+```{r}
+sars2 <- results %>% filter(target == 'SARS-CoV-2')
+
+sc_params <- sars2 %>% select(y_intercept, slope) %>% distinct %>% unlist %>% print
+```
+
+For the SC controls, the sample name records the concentration (I'm unsure on the units).
+
+```{r}
+sars2_sc <- sars2 %>% 
+  filter(task == 'STANDARD') %>%
+  mutate(conc = as.numeric(sample), conc_log10 = log10(conc))
+```
+
+Note that the Cq wasn't determined for one of the SC controls, so we'll need to decide how to treat that.
+
+```{r}
+sars2 %>% count(task, cq_status)
+```
+
+A simple but potentially misleading thing to do is drop that data point (also what R's `lm()` function does by default).
+
+To fit the standard curve with standard linear regression in R, we can use the `lm()` function.
+
+```{r}
+fit <- lm(data = sars2_sc, cq ~ conc_log10, na.action = na.omit)
+
+coef(fit)
+sc_params
+```
+
+This approach mathces the SC from QuantStudio's output, suggesting that simple linear regression, omitting the missing data point, was also used by OH in QuantStudio.
+
+Let's plot the fitted line with the data.
+
+```{r}
+sars2_sc %>%
+  ggplot(aes(log10(conc), cq)) +
+  # geom_abline(
+  #   intercept = sc_params['y_intercept'], 
+  #   slope = sc_params['slope'],
+  # ) +
+  geom_abline(
+    intercept = coef(fit)[1],
+    slope = coef(fit)[2],
+    linetype = 2
+  ) +
+  geom_point(alpha = 0.5)
+```
+
+The outlier point at the second-lowest concentration still seems to be having a big impact on the fit.
+In future, we can consider using more robust regression methods to handle this situation as well as the drop-out/undetermined Cq.
+
+To perform a SC calibration on the samples with unknown concentrations, we can apply the inverse function of the fitted line to get `log10(conc)`, and then take 10 raised to this number.
+
+```{r}
+intercept = coef(fit)[1]
+slope = coef(fit)[2]
+
+sars2_cal <- sars2 %>%
+  mutate(
+    log_conc_hat = (cq - intercept) / slope,
+    conc_hat = 10^log_conc_hat
+  )
+```
+
+Let's compare to the `quantity` column to confirm that we're getting the same result as the software for the 'unknown' samples,
+
+```{r}
+sars2_cal %>%
+  filter(task != 'NTC') %>%
+  ggplot(aes(conc_hat, quantity, color = task))  +
+  scale_color_manual(values = colors_oi[2:3] %>% unname) +
+  scale_y_log10() +
+  scale_x_log10() +
+  geom_point()
+```
+
+What about estimating the efficiency from the SC?
+The estimate from the QuantStudio software is
+
+```{r}
+sars2 %>% pull(efficiency) %>% unique
+```
+
+Note that the software resports the efficiency as a percentage (here, about 113%).
+
+We can also estimate the efficiency from the slope of the standard curve using the standard formula,
+
+```{r}
+efficiency_hat <- (10^(-1/slope) - 1) * 100
+efficiency_hat 
+```
+
+We can form interval estimates from a confidence interval on the slope estiamte.
+For example, a 90% confidence interval,
+
+```{r}
+slope_ci <- confint(fit, parm = 'conc_log10', level = 0.9)
+efficiency_ci <- (10^(-1/slope_ci) - 1) * 100
+efficiency_ci
+```
+
 ## Linear modeling
 
 Fit linear model to assess the effect of conditions on the Cq value on each target.
-Quick and unreliable analysis.
+Quick but perhaps unreliable analysis.
 
 Measure effect on average Cq value of the concentration treatment relative to the Amicon 30 kDa treatment.
 A positive effect corresponds to a decrease in concentration.

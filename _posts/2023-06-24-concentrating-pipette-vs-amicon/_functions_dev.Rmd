@@ -1,0 +1,295 @@
+# Setup
+
+```{r}
+library(tidyverse)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+```
+
+Load the various file types,
+
+```{r}
+fns_results <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Results_*.csv')
+fns_results %>% path_file
+
+fns_sc_result <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Standard Curve Result_*.csv')
+fns_sc_result %>% path_file
+
+fns_amp <- '_data' %>%
+  dir_ls(recurse = TRUE, glob = '*_Amplification Data_*.csv')
+fns_amp %>% path_file
+```
+
+Common cleaning function,
+
+```{r}
+# cleaning operation applied to results and amplification csv files
+clean_common <- function(x) {
+  x %>%
+    janitor::clean_names() %>%
+    separate(well_position, into = c('row', 'column'), sep = 1, remove = FALSE) %>%
+    mutate(
+      # for column, coerce to integer first to remove leading zeros
+      across(column, ~as.integer(.x) %>% ordered(levels = 1:12)),
+      across(row, ~ordered(.x, levels = LETTERS[1:8])),
+    )
+}
+```
+
+
+## Import Results CSV file
+
+```{r}
+results_raw <- fns_results[1] %>%
+  readr::read_csv(
+    comment = '#',
+  ) %>%
+  # janitor::clean_names() %>%
+  glimpse
+```
+
+```{r}
+results <- fns_results[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = 'iclccccccncccnnnlnlii',
+  ) %>%
+  clean_common() %>%
+  mutate(
+    # cq_status = cq,
+    cq = ifelse(cq == 'Undetermined', NA, cq) %>% as.numeric,
+    cq_status = ifelse(is.na(cq), 'Undetermined', 'Determined'),
+  ) %>%
+  glimpse
+```
+
+## Import 'Standard Curve Result' CSV file
+
+```{r}
+sc_results_raw <- fns_sc_result[1] %>%
+  readr::read_csv(
+    comment = '#',
+  ) %>%
+  # janitor::clean_names() %>%
+  glimpse
+```
+
+Compared to the Results table, there are some additional columns and the Omit colomn comes at the end instead of third.
+Seems better to get more explicit by setting types by column name.
+
+```{r}
+cts <- cols(
+  Well = 'i',
+  `Well Position` = 'c',
+  Sample = 'c',
+  Quantity = 'n',
+  Target = 'c',
+  Dye = 'c',
+  Task = 'c',
+  Reporter = 'c',
+  Quencher = 'c',
+  `Amp Status` = 'c',
+  Cq = 'n',
+  `Cq Mean` = 'n',
+  `Cq Confidence` = 'n',
+  `Cq SD` = 'n',
+  `Quantity Mean` = 'n',
+  `Quantity SD` = 'n',
+  `Auto Threshold` = 'l',
+  Threshold = 'n',
+  `Auto Baseline` = 'l',
+  `Baseline Start` = 'i',
+  `Baseline End` = 'i',
+# Tm1
+# Tm2
+# Tm3
+# Tm4
+  `Y-Intercept` = 'n',
+  R2 = 'n',
+  Slope = 'n',
+  Efficiency = 'n',
+  `Standard Deviation` = 'n',
+  `Standard Error` = 'n',
+  Omit = 'l'
+)
+
+fns_sc_result[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts,
+  ) %>%
+  glimpse
+```
+
+```{r}
+fns_sc_result[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts,
+  ) %>%
+  clean_common() %>%
+  mutate(
+    # cq_status = cq,
+    cq = ifelse(cq == 'Undetermined', NA, cq) %>% as.numeric,
+    cq_status = ifelse(is.na(cq), 'Undetermined', 'Determined'),
+  ) %>%
+  glimpse
+```
+
+## Dev method to cover both
+
+what happens if we try to use this col types object with the regular Results table (w/o the SC)?
+
+```{r}
+fns_results[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts,
+  ) %>%
+  glimpse
+```
+
+(We get a warning message.)
+
+Can we create the col specs separately for the shared and new fields, and then merge them for the SC results?
+
+```{r}
+cts_results <- cols(
+  Well = 'i',
+  `Well Position` = 'c',
+  Sample = 'c',
+  Target = 'c',
+  Task = 'c',
+  Reporter = 'c',
+  Quencher = 'c',
+  `Amp Status` = 'c',
+  Cq = 'n',
+  `Cq Mean` = 'n',
+  `Cq Confidence` = 'n',
+  `Cq SD` = 'n',
+  `Auto Threshold` = 'l',
+  Threshold = 'n',
+  `Auto Baseline` = 'l',
+  `Baseline Start` = 'i',
+  `Baseline End` = 'i',
+  Omit = 'l'
+)
+cts_sc <- cols(
+  Quantity = 'n',
+  Dye = 'c',
+  `Quantity Mean` = 'n',
+  `Quantity SD` = 'n',
+  `Y-Intercept` = 'n',
+  R2 = 'n',
+  Slope = 'n',
+  Efficiency = 'n',
+  `Standard Deviation` = 'n',
+  `Standard Error` = 'n',
+)
+
+cts_comb <- cols()
+cts_comb$cols <- c(cts_results$cols, cts_sc$cols)
+cts_comb %>% print
+
+fns_results[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts_results,
+  ) %>%
+  glimpse
+
+fns_sc_result[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts_comb,
+  ) %>%
+  glimpse
+```
+
+This seems to work well; note that the colums import in the same order as the CSV, despite having a different order in the cols spec.
+
+Can we auto-determine which file type we're working with, without importing the file?
+(Alternatively, can we import the file and suppress the warning when some columns are missing?)
+One way to check is to first read just the column names,
+
+```{r}
+cns <- fns_results[1] %>%
+  read_csv(
+    comment = '#',
+    n_max = 0,
+    show_col_types = FALSE,
+    progress = FALSE
+  ) %>%
+  names
+```
+
+We could then set the spec for just the columns that are actually present,
+
+```{r}
+cts_test <- cts_comb
+cts_test$cols <- cts_test$cols[intersect(names(cts_test$cols), cns)]
+cts_test 
+```
+
+Let's test this approach in the functions file,
+
+```{r}
+source('_functions.R')
+
+fns_sc_result[1] %>%
+  read_qpcr_results_csv() %>%
+  glimpse
+
+fns_results[1] %>%
+  read_qpcr_results_csv() %>%
+  glimpse
+```
+
+This is working alright, though note that the standard curve file reads in fine even if we use the col spec for the simpler results file, since the new columns have the correct types autopicked.
+
+
+# Import Amplification CSV file
+
+```{r}
+amp <- fns_amp[1] %>%
+  readr::read_csv(
+    comment = '#',
+  ) %>%
+  glimpse
+```
+
+```{r}
+cts_amp <- cols(
+  Well = 'i',
+  `Well Position` = 'c',
+  `Cycle Number` = 'i',
+  Target = 'c',
+  Rn = 'n',
+  dRn = 'n',
+  Sample = 'c',
+  Omit = 'l'
+)
+
+amp <- fns_amp[1] %>%
+  readr::read_csv(
+    comment = '#',
+    col_types = cts_amp,
+  ) %>%
+  clean_common() %>%
+  glimpse
+```
+
+# TODO: pull additional metadata from the comments in the CSV file
