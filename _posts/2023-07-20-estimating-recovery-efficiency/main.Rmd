@@ -1,0 +1,92 @@
+---
+title: "Guide to estimating recovery efficiency using a spike-in"
+description: | 
+  Some draft notes to support design and analysis for upcoming experiments.
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+  - qPCR
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  cache = FALSE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+```
+
+# Overview
+
+We would like to use BCoV as a spike-in to measure the recovery efficiency during sample processing through NA extraction.
+We have a solution of BCoV for which we do not know the concentration (the spike-in stock solution).
+We can measure BCoV using qPCR.
+But we do not have a standard available (which would be required to estimate the absolute concentration of BCoV).
+Nevertheless, we can estimate recovery efficiency by estimating the concentration of BCoV in the extraction elutant relative to the concentration in the spike-in stock solution.
+I now spell this out in detail.
+
+Let $R$ be the recovery efficiency, which I define as the fraction of BCoV gene copies from the sample that are in the elutant, or
+\begin{align}
+  R = \frac{\text{copies in elutant}}{\text{copies in sample}}.
+\end{align}
+Our goal is to experimentally estimate $R$.
+
+Let $s$ be the concentration of BCoV target gene in the spike-in stock solution in gene copies per mL.
+Let $v$ be the volume of spike-in solution added to the (raw) sample.
+Let $V_0$ be the volume of the sample.
+A total of $sv$ gene copies are added to sample, resulting in a concentration of the BCoV target gene in the spiked sample of $sv/V_0$.
+
+Let $V_1$ be the volume of the extraction elutant.
+Let $C_1$ be the absolute concentration of BCoV (in gene copies per mL) in the elutant and $c_1$ be the concentration relative to $s$, so that $C_1 = c_1 s$.
+We use qPCR to measure the extraction elutant of the sample; let $q$ be the resulting Cq value.
+
+When performing our qPCR measurements of BCoV, include a triplicate serial dilution of the BCoV spike-in solution, which we will use to create a standard curve (SC) for BCoV that relates the Cq values of the dilution samples to the _relative concentration_ (concentation relative to the concentration $s$ of the undiluted sample).
+We will use the SC to convert the measured Cq values for our extractions to relative concentrations, giving an estimate of the relative concentration $\hat c_1$.
+
+The recovery efficiency equals the copy number in the elutant ($c_1 s V_1$) divided by what we spiked into the sample ($s v$),
+
+\begin{align}
+  R = \frac{c_1 s V_1}{s v} = \frac{c_1 V_1}{v}.
+\end{align}
+
+Note that the unknown factor $s$ cancels, allowing us to estimate recovery efficiency from known (estimated) quantities,
+
+\begin{align}
+  \hat R = \frac{\hat c_1 V_1}{v}.
+\end{align}
