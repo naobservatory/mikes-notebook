@@ -1,0 +1,90 @@
+---
+title: "Explore DITP WastewaterSCAN data"
+description: | 
+author:
+  - name: Michael R. McLaren
+    url: {}
+categories:
+  - R
+bibliography: ../../_references.bib
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+draft: false
+output:
+  distill::distill_article:
+    self_contained: false
+    dev: svg
+    toc: true
+    code_folding: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  cache = FALSE,
+  autodep = TRUE,
+  cache.comments = FALSE,
+  dpi = 300,
+  include = TRUE
+)
+```
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(fs)
+library(here)
+
+library(knitr)
+
+library(broom)
+
+# plotting helpers
+library(cowplot)
+library(patchwork)
+library(ggbeeswarm)
+
+theme_set(theme_cowplot())
+
+# Okabe Ito color scheme with amber for yellow; see https://easystats.github.io/see/reference/scale_color_okabeito.html
+colors_oi <- grDevices::palette.colors()  
+colors_oi['yellow'] <- "#F5C710"
+```
+
+```{r}
+x <- here('_data/wastewaterscan/wwscan_ditp_all_targets_20230911.csv') %>%
+  read_csv
+```
+
+## Relative abundance of Influenza A to PMMoV
+
+```{r, eval = F, include = F}
+x %>% names %>% str_subset('Influenza')
+x %>% names %>% str_subset('PMMoV')
+x %>% names  %>% .[1:10]
+```
+
+The [WastewaterSCAN Dashboard](https://data.wastewaterscan.org/tracker/?charts=CicQACABSABSBmI1MGM2NFoLSW5mbHVlbnphIEF4kQKKAQZkMjhlZGU%3D&selectedChartId=d28ede) seems to be showing a smoothed version of the ratio of `1e6 * Influenza_A_gc_g_dry_weight/PMMoV_gc_g_dry_weight`,
+
+```{r}
+x %>%
+  ggplot(aes(collection_date, 1e6 * Influenza_A_gc_g_dry_weight/PMMoV_gc_g_dry_weight)) +
+  labs(y = '1e6 * Influenza A / PMMoV') +
+  geom_line()
+```
+
+I'm interested in the ratio of Flu A to PMMoV in genome copies, since we can use this to get a sence of the fraction of Flu A sequencing reads we could expect (by multiplying this ratio by the fraction of PMMoV reads).
+
+```{r, fig.dim = c(6,6)}
+p1 <- x %>%
+  ggplot(aes(collection_date, Influenza_A_gc_g_dry_weight/PMMoV_gc_g_dry_weight)) +
+  labs(y = 'Influenza A / PMMoV', x = 'Collection date') +
+  scale_x_date(date_labels = '%Y %b') +
+  geom_line()
+p2 <- x %>%
+  ggplot(aes(1e-6 + Influenza_A_gc_g_dry_weight/PMMoV_gc_g_dry_weight)) +
+  labs(x = 'Influenza A / PMMoV', y = 'Count') +
+  geom_histogram() +
+  scale_x_log10(limits = c(NA, 1e-3))
+p1 / p2 +
+  plot_annotation(title = 'Ratio of Influenza A to PMMoV (genome copies) at DITP')
+```
