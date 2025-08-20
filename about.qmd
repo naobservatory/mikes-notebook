@@ -1,0 +1,16 @@
+---
+title: "About"
+# image: profile.jpg
+about:
+  template: marquee
+  links:
+    - icon: github
+      text: Github
+      href: https://github.com/mikemc
+
+---
+
+This site is a collection of public notes and analyses related to my work at the [Nucleic Acid Observatory project](https://naobservatory.org).
+Be warned: Much of it is preliminary, unfinished, and unreviewed!
+
+An archived site with older posts is at https://naobservatory.github.io/mikes-notebook-archived.

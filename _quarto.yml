@@ -1,0 +1,17 @@
+project:
+  type: website
+
+website:
+  title: "Mike's public NAO notebook"
+  navbar:
+    right:
+      - about.qmd
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    css: styles.css
+
+
+
